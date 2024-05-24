@@ -1,3 +1,7 @@
+/data
+/visual
+/tmp
+
 # History files
 .Rhistory
 .Rapp.history
