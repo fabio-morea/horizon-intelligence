@@ -16,6 +16,9 @@ destination_path <- "./data/filtered-h/"
 
 library(tidyverse)
 library(lubridate)
+library(igraph)
+library(communities)
+
 
 
 ###################### function to calculate weight by year
@@ -34,6 +37,49 @@ days_in_year <- function(startDate, endDate, year) {
     }
 }
 
+################### functions network
+################### 
+
+
+make_orgs_network <- function(participation, network_name = '', plot_network = FALSE){
+    # input:  a long dataframe of edges (bimodal network): org, project weight
+    # output: a long dataframe of edges (one-mode network): org1, org2, weight
+    
+    # B is the bi-adjacency matrix (orgs x projects)
+    tmp <- participation %>% pivot_wider(
+        names_from = projID, 
+        values_from = weight, 
+        values_fill = 0,
+        values_fn = sum)
+    
+    B <- tmp %>% 
+        select(-orgID) %>% 
+        as.matrix()
+    
+    # projection as matrix product, distributes the weight among orgs
+    P <- B %*% t(B)
+    
+    rownames(P) <- tmp$orgID
+    colnames(P)<- tmp$orgID
+    
+    df_P <- data.frame(P) %>% 
+        mutate(org1 = as.character(rownames(P))) %>% 
+        pivot_longer( cols = -starts_with( c('org1', 'org2')), names_to = 'org2',  values_to = 'weight'  ) %>%
+        filter(weight > 0.0)
+    
+    g_orgs <- igraph::simplify(graph_from_data_frame(df_P, directed = FALSE))
+    delete.edges (g_orgs, which (E (g_orgs)$weight==0))
+    
+    if (plot_network){
+        plot(g_orgs, main = network_name, 
+             vertex.label = NA,
+             vertex.size = 1,
+             vertex.color = "green",
+             vertex.shape = "circle")
+    }
+    
+    return(g_orgs)
+}
 ################### load data 
 
 print(paste("Start reading files..."))
@@ -94,6 +140,70 @@ participation <- df %>%
     filter(weight > 0) 
 
 participation %>% write_csv(paste0(destination_path,'participation.csv'))
+
+
+######### network centrality measures ######### ######### 
+
+
+# libraries
+
+ 
+ 
+ 
+
+part <- participation
+part %>% ggplot()+geom_histogram(aes(x = weight))
+
+centrality_measures <- data.frame()
+
+par(mar = rep(1,4))
+ystart = min(part$year)
+yend = max(part$year)
+for (yy in ystart:yend ) {
+    print(yy)
+    part_y <- part %>% filter(year == yy)
+    gi <- part_y %>%
+        select(projID, orgID, weight) %>%
+        mutate(weight = weight / 1000) %>%
+        make_orgs_network(network_name = paste("Y", yy),
+                          plot_network = F)
+    
+    V(gi)$deg <- degree(gi)
+    V(gi)$str <- round(strength(gi),2)
+    
+    V(gi)$R_strength <- ifelse(V(gi)$str == 0, 0, V(gi)$str / max(V(gi)$str))  
+    V(gi)$core <- coreness(gi)
+    
+    gi %>% igraph::write.graph(file = paste0(destination_path, yy, '.graphml' ), 
+                               format = 'graphml')
+    
+    
+    # save degree, strength and coreness to file
+    df <- data.frame(year = paste0("Y", yy),
+                     orgID = V(gi)$name,
+                     degree = V(gi)$deg,
+                     strength = V(gi)$str, 
+                     R_strength = V(gi)$R_strength, 
+                     
+                     coreness = V(gi)$core)
+    
+    centrality_measures <- rbind(centrality_measures, df)
+    
+    
+    plot(gi,
+         vertex.color =  "white",
+         vertex.label = NA,
+         vertex.size = 10*V(gi)$R_strength,
+         edge.width = E(gi)$weight ,
+         layout = layout.fruchterman.reingold(gi),
+         main =  paste0("Y", yy)
+    )
+    
+    
+    as_long_data_frame(gi) %>% write_csv(paste0(destination_path,"df_Y", yy, '.csv'))
+}
+
+centrality_measures %>% write_csv(paste0(destination_path,'centrality_measures.csv'))
 
  
 
