@@ -208,7 +208,7 @@ euroSciVoc <- rbind(voc1, voc2) %>%
     arrange(euroSciVocTitle) %>%
     select(projID,level1, euroSciVocTitle)
 
-euroSciVoc %>% write_csv("voc.csv")
+euroSciVoc %>% write_csv("./data/voc.csv")
 
 #extract euroSciVoc codes list
 
