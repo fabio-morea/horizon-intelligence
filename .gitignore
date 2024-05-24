@@ -1,6 +1,7 @@
 /data
 /visual
 /tmp
+/csv
 
 # History files
 .Rhistory
