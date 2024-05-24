@@ -1,0 +1,109 @@
+﻿nuts1;nuts2;nuts3;provincia;regione;ripartizione
+ITC;ITC1;ITC11;Torino;Piemonte;Nord-Ovest
+ITC;ITC1;ITC12;Vercelli;Piemonte;Nord-Ovest
+ITC;ITC1;ITC13;Biella;Piemonte;Nord-Ovest
+ITC;ITC1;ITC14;Verbano-Cusio-Ossola;Piemonte;Nord-Ovest
+ITC;ITC1;ITC15;Novara;Piemonte;Nord-Ovest
+ITC;ITC1;ITC16;Cuneo;Piemonte;Nord-Ovest
+ITC;ITC1;ITC17;Asti;Piemonte;Nord-Ovest
+ITC;ITC1;ITC18;Alessandria;Piemonte;Nord-Ovest
+ITC;ITC2;ITC20;Valle d’Aosta/Vallée d’Aoste;Valle d’Aosta/Vallée d’Aoste;Nord-Ovest
+ITC;ITC3;ITC31;Imperia;Liguria;Nord-Ovest
+ITC;ITC3;ITC32;Savona;Liguria;Nord-Ovest
+ITC;ITC3;ITC33;Genova;Liguria;Nord-Ovest
+ITC;ITC3;ITC34;La Spezia;Liguria;Nord-Ovest
+ITC;ITC4;ITC41;Varese;Lombardia;Nord-Ovest
+ITC;ITC4;ITC42;Como;Lombardia;Nord-Ovest
+ITC;ITC4;ITC43;Lecco;Lombardia;Nord-Ovest
+ITC;ITC4;ITC44;Sondrio;Lombardia;Nord-Ovest
+ITC;ITC4;ITC46;Bergamo;Lombardia;Nord-Ovest
+ITC;ITC4;ITC47;Brescia;Lombardia;Nord-Ovest
+ITC;ITC4;ITC48;Pavia;Lombardia;Nord-Ovest
+ITC;ITC4;ITC49;Lodi;Lombardia;Nord-Ovest
+ITC;ITC4;ITC4A;Cremona;Lombardia;Nord-Ovest
+ITC;ITC4;ITC4B;Mantova;Lombardia;Nord-Ovest
+ITC;ITC4;ITC4C;Milano;Lombardia;Nord-Ovest
+ITC;ITC4;ITC4D;Monza e della Brianza;Lombardia;Nord-Ovest
+ITF;ITF1;ITF11;L’Aquila;Abruzzo;Sud
+ITF;ITF1;ITF12;Teramo;Abruzzo;Sud
+ITF;ITF1;ITF13;Pescara;Abruzzo;Sud
+ITF;ITF1;ITF14;Chieti;Abruzzo;Sud
+ITF;ITF2;ITF21;Isernia;Molise;Sud
+ITF;ITF2;ITF22;Campobasso;Molise;Sud
+ITF;ITF3;ITF31;Caserta;Campania;Sud
+ITF;ITF3;ITF32;Benevento;Campania;Sud
+ITF;ITF3;ITF33;Napoli;Campania;Sud
+ITF;ITF3;ITF34;Avellino;Campania;Sud
+ITF;ITF3;ITF35;Salerno;Campania;Sud
+ITF;ITF4;ITF43;Taranto;Puglia;Sud
+ITF;ITF4;ITF44;Brindisi;Puglia;Sud
+ITF;ITF4;ITF45;Lecce;Puglia;Sud
+ITF;ITF4;ITF46;Foggia;Puglia;Sud
+ITF;ITF4;ITF47;Bari;Puglia;Sud
+ITF;ITF4;ITF48;Barletta-Andria-Trani;Puglia;Sud
+ITF;ITF5;ITF51;Potenza;Basilicata;Sud
+ITF;ITF5;ITF52;Matera;Basilicata;Sud
+ITF;ITF6;ITF61;Cosenza;Calabria;Sud
+ITF;ITF6;ITF62;Crotone;Calabria;Sud
+ITF;ITF6;ITF63;Catanzaro;Calabria;Sud
+ITF;ITF6;ITF64;Vibo Valentia;Calabria;Sud
+ITF;ITF6;ITF65;Reggio di Calabria;Calabria;Sud
+ITG;ITG1;ITG11;Trapani;Sicilia;Isole
+ITG;ITG1;ITG12;Palermo;Sicilia;Isole
+ITG;ITG1;ITG13;Messina;Sicilia;Isole
+ITG;ITG1;ITG14;Agrigento;Sicilia;Isole
+ITG;ITG1;ITG15;Caltanissetta;Sicilia;Isole
+ITG;ITG1;ITG16;Enna;Sicilia;Isole
+ITG;ITG1;ITG17;Catania;Sicilia;Isole
+ITG;ITG1;ITG18;Ragusa;Sicilia;Isole
+ITG;ITG1;ITG19;Siracusa;Sicilia;Isole
+ITG;ITG2;ITG2D;Sassari;Sardegna;Isole
+ITG;ITG2;ITG2E;Nuoro;Sardegna;Isole
+ITG;ITG2;ITG2F;Cagliari;Sardegna;Isole
+ITG;ITG2;ITG2G;Oristano;Sardegna;Isole
+ITG;ITG2;ITG2H;Sud Sardegna;Sardegna;Isole
+ITH;ITH1;ITH10;Bolzano-Bozen;Provincia Autonoma di Bolzano/Bozen;Nord-Est
+ITH;ITH2;ITH20;Trento;Provincia Autonoma di Trento;Nord-Est
+ITH;ITH3;ITH31;Verona;Veneto;Nord-Est
+ITH;ITH3;ITH32;Vicenza;Veneto;Nord-Est
+ITH;ITH3;ITH33;Belluno;Veneto;Nord-Est
+ITH;ITH3;ITH34;Treviso;Veneto;Nord-Est
+ITH;ITH3;ITH35;Venezia;Veneto;Nord-Est
+ITH;ITH3;ITH36;Padova;Veneto;Nord-Est
+ITH;ITH3;ITH37;Rovigo;Veneto;Nord-Est
+ITH;ITH4;ITH41;Pordenone;Friuli-Venezia Giulia;Nord-Est
+ITH;ITH4;ITH42;Udine;Friuli-Venezia Giulia;Nord-Est
+ITH;ITH4;ITH43;Gorizia;Friuli-Venezia Giulia;Nord-Est
+ITH;ITH4;ITH44;Trieste;Friuli-Venezia Giulia;Nord-Est
+ITH;ITH5;ITH51;Piacenza;Emilia-Romagna;Nord-Est
+ITH;ITH5;ITH52;Parma;Emilia-Romagna;Nord-Est
+ITH;ITH5;ITH53;Reggio nell’Emilia;Emilia-Romagna;Nord-Est
+ITH;ITH5;ITH54;Modena;Emilia-Romagna;Nord-Est
+ITH;ITH5;ITH55;Bologna;Emilia-Romagna;Nord-Est
+ITH;ITH5;ITH56;Ferrara;Emilia-Romagna;Nord-Est
+ITH;ITH5;ITH57;Ravenna;Emilia-Romagna;Nord-Est
+ITH;ITH5;ITH58;Forlì-Cesena;Emilia-Romagna;Nord-Est
+ITH;ITH5;ITH59;Rimini;Emilia-Romagna;Nord-Est
+ITI;ITI1;ITI11;Massa-Carrara;Toscana;Centro
+ITI;ITI1;ITI12;Lucca;Toscana;Centro
+ITI;ITI1;ITI13;Pistoia;Toscana;Centro
+ITI;ITI1;ITI14;Firenze;Toscana;Centro
+ITI;ITI1;ITI15;Prato;Toscana;Centro
+ITI;ITI1;ITI16;Livorno;Toscana;Centro
+ITI;ITI1;ITI17;Pisa;Toscana;Centro
+ITI;ITI1;ITI18;Arezzo;Toscana;Centro
+ITI;ITI1;ITI19;Siena;Toscana;Centro
+ITI;ITI1;ITI1A;Grosseto;Toscana;Centro
+ITI;ITI2;ITI21;Perugia;Umbria;Centro
+ITI;ITI2;ITI22;Terni;Umbria;Centro
+ITI;ITI3;ITI31;Pesaro e Urbino;Marche;Centro
+ITI;ITI3;ITI32;Ancona;Marche;Centro
+ITI;ITI3;ITI33;Macerata;Marche;Centro
+ITI;ITI3;ITI34;Ascoli Piceno;Marche;Centro
+ITI;ITI3;ITI35;Fermo;Marche;Centro
+ITI;ITI4;ITI41;Viterbo;Lazio;Centro
+ITI;ITI4;ITI42;Rieti;Lazio;Centro
+ITI;ITI4;ITI43;Roma;Lazio;Centro
+ITI;ITI4;ITI44;Latina;Lazio;Centro
+ITI;ITI4;ITI45;Frosinone;Lazio;Centro
+;;;;;
