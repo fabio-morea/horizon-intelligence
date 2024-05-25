@@ -1,3 +1,5 @@
+source('./code/hi_0_parameters.R')
+source('./code/hi_functions.R')
 
 
 
@@ -27,13 +29,7 @@ library(tidyverse)
 library(lubridate)
 library(readxl)
 
-# parameters: 
-download_H2020 <- F
-download_HEUROPE <- F
 
-
-folder_H2020 <- "./data/H_2020_csv/"
-folder_HEurope <- "./data/H_EU_csv/"
 
 ############# functions ############# 
 

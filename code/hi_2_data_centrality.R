@@ -2,15 +2,18 @@
 # procedure: 
 #   first subset by topic
 #   then calculate weight by year (on the subset only)
+# 
+# ################################################
+# ################################################
+#  
+# selected_esv_topic <- "electron microscopy"
+# destination_path <- "./data/filtered-m/"
+# 
+# ################################################
+# ################################################
 
-################################################
-################################################
- 
-selected_esv_topic <- "electron microscopy"
-destination_path <- "./data/filtered-m/"
-
-################################################
-################################################
+source('./code/hi_0_parameters.R')
+source('./code/hi_functions.R')
 
 # libraries
 
