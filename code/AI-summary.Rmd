@@ -34,17 +34,7 @@ df <- read_csv(paste0(destination_path,'prj_objectives.csv')) %>%
 
 ```{r}
 
-
-# Define the API endpoint
-url <- "https://api.openai.com/v1/engines/gpt-3.5-turbo-instruct/completions"
-# fast and unexpansive model
-# https://openai.com/api/pricing/
-    
-# Define the headers
-headers <- add_headers(
-  "Content-Type" = "application/json",
-  "Authorization" = paste("Bearer", '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')
-)
+source('api_url_key.R')
 
 prompt = "Given the following text describing project objectives, generate a sentence summarizing project objectives. 
 Add a list of single-word keywords that capture the technological focus of the project. each keyword is composed of 1 or 2 words.

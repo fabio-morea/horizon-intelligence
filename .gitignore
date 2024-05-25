@@ -2,6 +2,10 @@
 /visual
 /tmp
 /csv
+/api_url_key
+
+# notebook output
+.html
 
 # History files
 .Rhistory
