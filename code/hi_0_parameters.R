@@ -12,3 +12,5 @@ selected_esv_topic <- "electron microscopy"
 destination_path <- "./data/filtered-m/"
 
 #network centrality measures and communities
+miny <- 2016 
+maxy <- 2028
