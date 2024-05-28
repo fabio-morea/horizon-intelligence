@@ -21,10 +21,19 @@ library(communities)
 
 print(paste("Start reading files..."))
 
+info <- read_csv('./data/latest_update.csv') %>%
+    mutate(visual_title, selected_esv_topic, miny, maxy) 
+
+info %>% write_csv(paste0(destination_path, "info.csv")) 
+
+
 orgs <- read_csv('./data/orgs.csv', show_col_types = TRUE) 
 
 prjs <- read_csv('./data/project_topic_esv.csv', show_col_types = TRUE) %>%
     select(-level1) %>% rename(esv_topic = euroSciVocTitle)
+
+
+
 
 objectives <- read_csv('./data/prj_objectives.csv', show_col_types = TRUE)  
 
@@ -59,6 +68,9 @@ selected_objectives <- objectives %>%
 selected_objectives  %>% 
     write_csv(paste0(destination_path,"prj_objectives.csv"))
 
+prjs %>% select(projID, esv_topic) %>% 
+    filter(projID %in% selected_projects) %>%
+    write_csv(paste0(destination_path, "esv_topics.csv")) 
 
 df <- left_join(participation, projects, by = 'projID') %>%
     filter(startDate > 0, endDate > 0, !is.na(startDate), !is.na(endDate))  

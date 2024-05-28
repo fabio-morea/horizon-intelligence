@@ -19,11 +19,8 @@ library(tidyverse)
 library(igraph)
 library(aricode)
 
-
 source('./code/hi_0_parameters.R')
 source('./code/hi_functions.R')
-
-
 
 co_occurrence <- function(M, names, alpha) {
     # calculates normalized co-occurrence matrix
@@ -54,13 +51,6 @@ co_occurrence <- function(M, names, alpha) {
     return (CO)
 }
 
-
-# 
-# comms <- read_csv(paste0(destination_path,'ntwk_communities.csv'))
-# r)
-
- 
-
 results <- data.frame()
 for (yy in miny:maxy) {
     gy <- igraph::read.graph(
@@ -68,13 +58,13 @@ for (yy in miny:maxy) {
     
     if(vcount(gy)==1){next}
     
-    st = 1
+    
     ssp <- communities::solutions_space(gy,
-                                        tmax = 100,
-                                        met = "LV" ,
-                                        param = st)
+                                        tmax = 200,
+                                        met = community_detection_method,
+                                        param = param)
     communities::plot_sol_space(ssp)$pl2 +
-        ggtitle(paste("Solution space year", yy, "steps = ", st))
+        ggtitle(paste("Solution space year", yy, "steps = ", param))
     
     n_solutions <- nrow(ssp$data) - 1
     if (ssp$data$cumsum[1] >= 0.5) {
@@ -137,14 +127,6 @@ for (yy in miny:maxy) {
 results %>% 
     select(year, orgID, weight , community, community_size) %>%
     write_csv(paste0(destination_path,"ntwk_communities.csv"))
-# 
-# results2 <-results %>% 
-#   select(year, orgID, community) %>%
-#   pivot_wider(names_from = year, 
-#               values_from = community) %>%
-#   mutate(across(everything(), ~ replace_na(.x, -1)))%>%
-#   pivot_longer(cols = -orgID, names_to = "year",values_to = "community",
-#     names_transform = list(year = as.integer))
 
 comms <- results %>%
     mutate(CommY = paste0("temp", year, "_", community)) %>%
