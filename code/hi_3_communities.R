@@ -56,6 +56,10 @@ for (yy in miny:maxy) {
     gy <- igraph::read.graph(
         file = paste0(destination_path, yy, '.graphml'),format = 'graphml')
     
+    gy <- delete_edges(gy, E(gy)[weight == 0])
+    
+    gy <- delete_vertices(gy, V(gy)[degree(gy) < 2])
+    
     if(vcount(gy)==1){next}
     
     

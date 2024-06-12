@@ -90,7 +90,7 @@ participation <- df %>%
         normalized_by_project_duration = days_active / project_duration
     ) %>%
     ungroup() %>%
-    mutate(weight = round(ecContribution * normalized_by_project_duration, 3)) %>%
+    mutate(weight = round(totalCost * normalized_by_project_duration, 3)) %>%
     mutate(year = year_weight)%>%
     select(-days_active,-project_duration,-normalized_by_project_duration, -year_weight, -startDate, -endDate)%>% 
     filter(weight > 0) 
@@ -121,15 +121,22 @@ for (yy in ystart:yend ) {
     gi <- part_y %>%
         select(projID, orgID, weight) %>%
         mutate(weight = weight / 1000) %>%
-        make_orgs_network(network_name = paste("Y", yy),
-                          plot_network = F)
+        make_orgs_network(network_name = paste("Y", yy))
+    
+    E(gi)$weight <- E(gi)$weight %>% round(6)   
+    gi <- delete_edges(gi, E(gi)[weight == 0])
+    gi <- delete_vertices(gi, V(gi)[degree(gi) == 0])
+    if(vcount(gi)==0){next}
     
     V(gi)$deg <- degree(gi)
     V(gi)$str <- round(strength(gi),2)
     
     V(gi)$R_strength <- ifelse(V(gi)$str == 0, 0, V(gi)$str / max(V(gi)$str))  
     V(gi)$core <- coreness(gi)
+ 
+
     
+ 
     gi %>% igraph::write.graph(file = paste0(destination_path, yy, '.graphml' ), 
                                format = 'graphml')
     

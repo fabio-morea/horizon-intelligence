@@ -182,11 +182,11 @@ str(projects)
 print("Preparing participation table")
 
 participation <- orgs %>%
-    select("projID", "orgID","rcn","role", "ecContribution") %>% 
+    select("projID", "orgID","rcn","role", "totalCost") %>% 
     mutate(coordinator = ifelse(role == "coordinator", TRUE, FALSE)) %>%
     select(-role)%>%
-    filter(ecContribution > 10.0) %>%
-    mutate(ecContribution = round(as.numeric(ecContribution)/1000,3))  
+    filter(totalCost > 10.0) %>%
+    mutate(totalCost = round(as.numeric(totalCost)/1000,3))  
 participation %>% write_csv('./data/participation.csv')
  
 
