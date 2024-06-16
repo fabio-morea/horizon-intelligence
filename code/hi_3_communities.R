@@ -26,7 +26,7 @@ co_occurrence <- function(M, names, alpha) {
     # calculates normalized co-occurrence matrix
     # using the results of explore_communities
     
-    n_trials <- length(alpha)-1
+    n_trials <- length(alpha)
     n_nodes <- nrow(M)
     CO <- matrix(0, nrow = n_nodes, ncol = n_nodes)
     #colnames(CO) <- names
@@ -53,6 +53,7 @@ co_occurrence <- function(M, names, alpha) {
 
 results <- data.frame()
 for (yy in miny:maxy) {
+    print(yy)
     gy <- igraph::read.graph(
         file = paste0(destination_path, yy, '.graphml'),format = 'graphml')
     
@@ -67,22 +68,26 @@ for (yy in miny:maxy) {
                                         tmax = 200,
                                         met = community_detection_method,
                                         param = param)
+    
+    ssp$data <- ssp$data %>% filter(id != "New")
     communities::plot_sol_space(ssp)$pl2 +
         ggtitle(paste("Solution space year", yy, "steps = ", param))
     
-    n_solutions <- nrow(ssp$data) - 1
+    n_solutions <- nrow(ssp$data) 
     if (ssp$data$cumsum[1] >= 0.5) {
         if (n_solutions==1){
             mm <- ssp$M 
+            print(paste0(yy, ": single solution."))
         } else {
             mm <- ssp$M[,1]
+            print(paste0(yy, ": dominant solution."))
         }
         
         nc <- length(table(mm))
         V(gy)$community <- mm
         community_sizes <- table(V(gy)$community)
         V(gy)$community_size <- community_sizes[as.character(V(gy)$community)]
-        print(paste0(yy, ": single solution. NC = ", nc))
+        print(paste0(yy, "  NC = ", nc))
         
     } else {
         print(paste0(yy, ": multiple solutions: consensus!"))
@@ -106,7 +111,7 @@ for (yy in miny:maxy) {
         colnames(D)<- names
         rownames(D)<- names
         
-        comms<-CCD::consensus_communities(D, p =.6)
+        comms<-CCD::consensus_communities(D, p =.8)
         
         #aggregate singletons in community 0
         #comms$community[ comms$community_size == 1] <- 0
