@@ -108,6 +108,9 @@ for (yy in miny:maxy) {
         
         comms<-CCD::consensus_communities(D, p =.6)
         
+        #aggregate singletons in community 0
+        #comms$community[ comms$community_size == 1] <- 0
+        
         nc <- max(comms$cons_comm_label)
         V(gy)$community <- comms$cons_comm_label
         community_sizes <- table(V(gy)$community)

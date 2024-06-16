@@ -8,12 +8,12 @@ folder_H2020 <- "./data/H_2020_csv/"
 folder_HEurope <- "./data/H_EU_csv/"
 
 #network centrality measures and communities
-miny <- 2016 
-maxy <- 2028
+miny <- 2015 
+maxy <- 2029
 
 # community detection
-community_detection_method <- "WT"
-param = 4 #steps
+community_detection_method <- "IM"
+param = 1 #repetitions
 
 #filter 
 # selected_esv_topic <- "electron microscopy"

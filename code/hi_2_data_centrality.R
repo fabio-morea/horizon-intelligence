@@ -77,13 +77,13 @@ df <- left_join(participation, projects, by = 'projID') %>%
 
 
 # Apply the function to each row and each year
-for(year in 2014:2028) {
+for(year in miny:maxy) {
     print(paste("calculating weight by year...", year))
     df[[as.character(year)]] <- mapply(days_in_year, df$startDate, df$endDate, MoreArgs = list(year = year))
 }
 
 participation <- df %>%
-    pivot_longer(cols = `2014`:`2028`, names_to = "year_weight", values_to = "days_active" ) %>%
+    pivot_longer(cols = `2015`:`2029`, names_to = "year_weight", values_to = "days_active" ) %>%
     group_by(projID) %>%
     mutate(
         project_duration = as.numeric(difftime(endDate, startDate, units = "days")) + 1,
@@ -101,11 +101,6 @@ participation %>% write_csv(paste0(destination_path,'participation.csv'))
 ######### network centrality measures ######### ######### 
 
 
-# libraries
-
- 
- 
- 
 
 part <- participation
 part %>% ggplot()+geom_histogram(aes(x = weight))
@@ -129,7 +124,7 @@ for (yy in ystart:yend ) {
     if(vcount(gi)==0){next}
     
     V(gi)$deg <- degree(gi)
-    V(gi)$str <- round(strength(gi),2)
+    V(gi)$str <- strength(gi)
     
     V(gi)$R_strength <- ifelse(V(gi)$str == 0, 0, V(gi)$str / max(V(gi)$str))  
     V(gi)$core <- coreness(gi)

@@ -39,19 +39,25 @@ make_orgs_network <- function(participation, network_name = '', plot_network = F
     # projection as matrix product, distributes the weight among orgs
     P <- B %*% t(B)
     
-    diag(P) <- 0 #remove self-loop
+    Wt = sum(B)
+    nnn <- sqrt(diag(P))
+    norm_matrix <-
+        matrix(Wt, nrow = nrow(P), ncol = ncol(P), byrow = TRUE) -
+        matrix(nnn, nrow = nrow(P), ncol = ncol(P), byrow = TRUE)
     
+    P <- P / norm_matrix
+    
+    diag(P) <- 0 #remove self-weight
     
     rownames(P) <- tmp$orgID
     colnames(P)<- tmp$orgID
     
     df_P <- data.frame(P) %>% 
         mutate(org1 = as.character(rownames(P))) %>% 
-        pivot_longer( cols = -starts_with( c('org1', 'org2')), names_to = 'org2',  values_to = 'weight'  ) %>%
-        mutate(weight = sqrt(weight)/2)
+        pivot_longer( cols = -starts_with( c('org1', 'org2')), names_to = 'org2',  values_to = 'weight'  )
     
     g_orgs <- igraph::simplify(graph_from_data_frame(df_P, directed = FALSE))
-    delete.edges (g_orgs, which (E (g_orgs)$weight==0))
+    g_orgs <- delete.edges (g_orgs, which (E (g_orgs)$weight==0))
     
     if (plot_network){
         plot(g_orgs, main = network_name, 
