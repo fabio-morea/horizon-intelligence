@@ -1,0 +1,95 @@
+---
+title: "figure1"
+editor: visual
+---
+
+## example of bimodal network
+
+```{r}
+library(tidyverse)
+library(igraph)
+source('./code/hi_0_parameters.R')
+source('./code/hi_functions.R')
+```
+
+load data
+
+```{r}
+part <- read_csv('./data/participation.csv')
+project_partners <- part %>%
+  group_by(projID) %>%
+  summarize(num_orgID = n_distinct(orgID))
+
+selected_example <- project_partners %>%
+    arrange(num_orgID)%>%
+    filter(num_orgID >= 5) %>%
+    head(1)
+
+selected_part <- read_csv('./data/participation.csv') %>% 
+    select(projID, orgID, totalCost)%>%
+    rename(weight = totalCost) %>%
+    filter(projID %in% selected_example$projID)
+    
+
+```
+
+```{r}
+
+# Identify unique orgID values
+unique_orgIDs <- unique(selected_part$orgID)
+
+# Create a mapping of orgID to letters
+orgID_to_letter <- setNames(LETTERS[1:length(unique_orgIDs)], unique_orgIDs)
+
+# Replace orgID values with letters
+selected_part$orgID <- orgID_to_letter[as.character(selected_part$orgID)]
+
+
+g <- igraph::graph_from_data_frame(selected_part, 
+                                   directed = FALSE)
+V(g)$type <- if_else(substr(V(g)$name, 1, 1) == "p", TRUE, FALSE)
+shapes = if_else(V(g)$type, "square", "circle")
+colors = if_else(V(g)$type, "lightgreen", "white")
+V(g)$name = if_else(V(g)$type, "p", V(g)$name)
+
+plot(g, vertex.shape = shapes, 
+     vertex.size = 60, 
+     vertex.color = colors , 
+     edge.width = E(g)$weight/1000, 
+     layout = layout.graphopt)
+
+
+```
+
+```{r}
+go <- make_orgs_network(selected_part, 
+                        network_name = 'one-mode network', plot_network = FALSE)
+
+print (sum(E(g)$weight) / sum(E(go)$weight))
+
+```
+
+```{r}
+#png("./figures/1-bimodal network/figure-1.png")
+par(mfrow = c(1, 2), mar = c(0,0,5,0))
+plot(g, vertex.shape = shapes, 
+     vertex.size = 50, 
+     vertex.color = colors , 
+     edge.width = sqrt(E(g)$weight)/10, 
+     layout = layout.graphopt,
+     main = "two-mode network", aspect = 0.5)
+     
+plot(go, vertex.size = 50, 
+     vertex.color = "white", 
+     edge.width = sqrt(E(go)$weight)/10,
+     layout = layout.graphopt, 
+     main = "one-mode network", aspect = 0.5
+     )
+#dev.off()
+```
+
+```{r}
+
+
+
+```

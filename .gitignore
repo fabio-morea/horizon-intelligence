@@ -3,7 +3,7 @@
 /tmp
 /csv
 /api_url_key
-/figures
+ 
 
 # notebook output
 .html

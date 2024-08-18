@@ -1,0 +1,35 @@
+---
+title: "figure2"
+format: html
+editor: visual
+---
+
+```{r}
+library(igraph)
+library(tidyverse)
+source('./code/hi_0_parameters.R')
+source('./code/hi_functions.R')
+
+```
+
+```{r}
+for(yy in 2015:2028){
+    
+print(yy)
+g <- read.graph(file = paste0('data/filtered-h/',yy,'.graphml'),format = 'graphml')
+E(g)$weight <- E(g)$weight %>% round(3)
+g <- delete_edges(g, E(g)[weight == 0])
+g <- delete_vertices(g, V(g)[degree(g) <=1])
+
+png(paste0('./figures/2-full network/',yy,'.png'))
+par(mar=c(0,0,0,0))
+plot(g, vertex.label = NA, 
+     vertex.size = sqrt(V(g)$R_strength) *30,
+     vertex.color = '#0000FF40', 
+     layout = layout.fruchterman.reingold(g), 
+     #main = yy, 
+     asp = .5)
+dev.off()
+}
+
+```

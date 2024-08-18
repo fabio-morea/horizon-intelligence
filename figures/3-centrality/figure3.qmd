@@ -1,0 +1,80 @@
+---
+title: "figure3"
+format: html
+editor: visual
+---
+
+```{r}
+library(igraph)
+library(tidyverse)
+source('./code/hi_0_parameters.R')
+source('./code/hi_functions.R')
+
+```
+
+```{r}
+centrality_measures <- read_csv(paste0(destination_path,'centrality_measures.csv'))
+
+```
+
+```{r}
+    
+
+summary_ts <- centrality_measures %>%
+    group_by(orgID)%>%
+    summarize(total_strength = sum(strength), coreness = mean(coreness))
+
+max_total_str =  summary_ts %>% 
+    arrange(-total_strength) %>%
+    head(100) %>% distinct(orgID) %>% pull(orgID) 
+
+min_total_str = summary_ts %>% 
+    filter(total_strength<5000) %>% 
+    distinct(orgID) %>% pull(orgID)
+
+not_null_in_1 <- centrality_measures %>%
+    filter(year == "Y2016", coreness >1)%>%
+    pull(orgID)
+
+not_null_in_2 <- centrality_measures %>%
+    filter(year == "Y2028", coreness >1)%>%
+    pull(orgID)
+    
+
+intersection <- intersect(min_total_str, max_total_str)
+intersection <- intersection %>%
+    intersect( not_null_in_1)  %>%
+    intersect( not_null_in_2) %>%
+    head(6)
+
+length(intersection)
+```
+
+```{r}
+
+
+#png("./figures/3-centrality/figure-3.png")
+
+centrality_measures <- centrality_measures %>%
+    mutate(yy = substr(year, 2, 5) %>% as.integer())
+
+centrality_measures %>%
+    filter(orgID %in% intersection) %>%
+    ggplot(aes(
+        x = yy,
+        y = coreness,
+        group = orgID,
+        color = orgID)) +
+    geom_point() + geom_line() +
+    scale_y_log10() +
+    scale_x_continuous(breaks = seq(
+        min(centrality_measures$yy),
+        max(centrality_measures$yy),
+        by = 5)) +
+    facet_wrap( ~ orgID) +
+    theme_bw() +
+    theme(legend.position = "none") +
+    labs(x = "year")
+
+#dev.off()
+```

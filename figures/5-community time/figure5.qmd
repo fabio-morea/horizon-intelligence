@@ -1,0 +1,76 @@
+---
+title: "figure5"
+format: html
+editor: visual
+---
+
+```{r}
+library(igraph)
+library(tidyverse)
+source('./code/hi_0_parameters.R')
+source('./code/hi_functions.R')
+
+```
+
+```{r}
+for(yy in 2015:2028){
+    
+
+g <- read.graph(file = paste0('data/filtered-h/',yy,'.graphml'),format = 'graphml')
+E(g)$weight <- E(g)$weight %>% round(2)
+g <- delete_edges(g, E(g)[weight == 0])
+g <- delete_vertices(g, degree(g) ==0)
+
+
+png(paste0('./figures/5-community time/',yy,'.png'))
+par(mar=c(0,0,2,0))
+lo <- layout.fruchterman.reingold(g)
+plot(g, vertex.label = NA, 
+     vertex.size = sqrt(V(g)$R_strength) *50, 
+     vertex.color = V(g)$community, 
+     layout = lo, 
+     main = yy, asp = 0.5)
+
+dev.off()
+# 
+# comms<-igraph::make_clusters(g, V(g)$community )
+# 
+# 
+# plot(comms,g, vertex.label = NA, 
+#      vertex.size = sqrt(V(g)$R_strength) *50, 
+#      main = yy,
+#          layout = lo)
+}
+
+```
+
+```{r}
+
+yy=2017
+g <- read.graph(file = paste0('data/filtered-h/',yy,'.graphml'),format = 'graphml')
+E(g)$weight <- E(g)$weight %>% round(2)
+g <- delete_edges(g, E(g)[weight == 0])
+g <- delete_vertices(g, degree(g) ==0)
+
+par(mar=c(0,0,0,0))
+lo <- layout.fruchterman.reingold(g)
+plot(g, vertex.label = NA, 
+     vertex.size = sqrt(V(g)$R_strength) *50, 
+     vertex.color = V(g)$community, 
+     edge.width = E(g)$weight,
+     layout = lo, asp = 0.5)
+
+nc = max(V(g)$community)
+for (i in 1:nc){
+    print(i)
+    gc <- igraph::induced.subgraph(g, V(g)$community == i)
+    if(vcount(gc) <4){next}
+    lo <- layout.graphopt(gc)
+plot(gc, vertex.label = NA, 
+     vertex.size = sqrt(V(gc)$R_strength) *50, 
+     vertex.color = V(gc)$community, 
+     layout = lo, asp = 0.5)
+}
+ 
+
+```

@@ -1,0 +1,175 @@
+---
+title: "figure4"
+format: html
+editor: visual
+---
+
+```{r}
+library(igraph)
+library(tidyverse)
+library(communities)
+library(cowplot)
+library(magick) #png
+
+source('./code/hi_0_parameters.R')
+source('./code/hi_functions.R')
+
+```
+
+# function
+
+```{r}
+
+make_figure <- function(yy, met, param, tmax, ar) {
+    gy <-
+        igraph::read.graph(file = paste0(destination_path, yy, '.graphml'),format = 'graphml')
+    
+    plot_list <- c()
+    
+    ssp <- communities::solutions_space(gy,
+                                        met = met,
+                                        tmax = tmax,
+                                        param = param)
+    
+    ssp$data <- ssp$data %>% filter(id != "New")
+    nn <- nrow(ssp$data) 
+    
+    plotssp <- communities::plot_sol_space(ssp)
+    
+    plot_list[[length(plot_list) + 1]] <- plotssp$pl2 +
+        theme(legend.position =  "none") +
+        labs(title = paste0("method: ", met)) +
+        theme(panel.grid.minor = element_blank(),  
+              aspect.ratio = ar)+
+        scale_y_continuous( breaks = 0.5:nn+0.5,
+                            labels = ssp$data$id|>head(nn))  
+    
+    plot_list[[length(plot_list) + 1]] <- plotssp$pl3 +
+        theme(legend.position =  "none") +
+        labs(x = "community size distribution", title = " ") +
+        theme(panel.grid.minor = element_blank(),
+              panel.grid.major = element_blank(),
+              axis.text.y = element_blank(),  
+              axis.ticks.y = element_blank(),
+              aspect.ratio = ar)+
+        ylim(0.5,nn+0.5) 
+    
+    return(plot_grid(
+        plotlist = plot_list,
+        ncol = 2,
+        nrow = 1))
+
+}
+
+```
+
+# 2020
+
+```{r}
+yy <-2020
+p1<-make_figure(yy = yy, met="LV", param= 1.0, tmax=100, ar = 0.4)
+p2<-make_figure(yy = yy, met="LD", param= 0.5, tmax=100, ar = 0.2)
+p3<-make_figure(yy = yy, met="LP", param= 1.0, tmax=100, ar = 0.8)
+p4<-make_figure(yy = yy, met="IM", param= 1.0, tmax=200, ar = 0.5)
+p5<-make_figure(yy = yy, met="WT", param= 4.0, tmax=100, ar = 0.15)
+
+p1
+p2
+p3
+p4
+p5
+
+ggsave('./figures/4-explore-sol-space/figure-4-1-2020.png', 
+       plot = p1, 
+       width = 10, height = 3, dpi = 300)
+ 
+ggsave('./figures/4-explore-sol-space/figure-4-2-2020.png', 
+       plot = p2, 
+       width = 10, height = 2, dpi = 300)
+
+ggsave('./figures/4-explore-sol-space/figure-4-3-2020.png', 
+       plot = p3, 
+       width = 10, height = 5, dpi = 300)
+
+ggsave('./figures/4-explore-sol-space/figure-4-4-2020.png', 
+       plot = p4, 
+       width = 10, height = 4, dpi = 300)
+
+ggsave('./figures/4-explore-sol-space/figure-4-5-2020.png', 
+       plot = p5, 
+       width = 10, height = 1.5, dpi = 300)
+
+img1 <- image_read('./figures/4-explore-sol-space/figure-4-1-2020.png')
+img2 <- image_read('./figures/4-explore-sol-space/figure-4-2-2020.png')
+img3 <- image_read('./figures/4-explore-sol-space/figure-4-3-2020.png')
+img4 <- image_read('./figures/4-explore-sol-space/figure-4-4-2020.png')
+img5 <- image_read('./figures/4-explore-sol-space/figure-4-5-2020.png')
+
+# Combine the images into a single column
+combined_img <- image_append(c(img1, img2, img3, img4, img5), stack = TRUE)
+
+combined_img
+# Save the combined image
+image_write(combined_img, 
+            path = "./figures/4-explore-sol-space/figure-SSP-2020.png", 
+            format = "png")
+```
+
+```{r}
+yy <-2018
+p1<-make_figure(yy = yy, met="LV", param= 1.0, tmax=100, ar = 0.4)
+p2<-make_figure(yy = yy, met="LD", param= 0.5, tmax=100, ar = 0.2)
+p3<-make_figure(yy = yy, met="LP", param= 1.0, tmax=20, ar = 0.8)
+p4<-make_figure(yy = yy, met="IM", param= 1.0, tmax=100, ar = 0.5)
+p5<-make_figure(yy = yy, met="WT", param= 4.0, tmax=100, ar = 0.15)
+
+p1
+p2
+p3
+p4
+p5
+
+ggsave('./figures/4-explore-sol-space/figure-4-1-2018.png', 
+       plot = p1, 
+       width = 10, height = 3, dpi = 300)
+ 
+ggsave('./figures/4-explore-sol-space/figure-4-2-2018.png', 
+       plot = p2, 
+       width = 10, height = 2, dpi = 300)
+
+ggsave('./figures/4-explore-sol-space/figure-4-3-2018.png', 
+       plot = p3, 
+       width = 10, height = 5, dpi = 300)
+
+ggsave('./figures/4-explore-sol-space/figure-4-4-2018.png', 
+       plot = p4, 
+       width = 10, height = 4, dpi = 300)
+
+ggsave('./figures/4-explore-sol-space/figure-4-5-2018.png', 
+       plot = p5, 
+       width = 10, height = 1.5, dpi = 300)
+
+img1 <- image_read('./figures/4-explore-sol-space/figure-4-1-2018.png')
+img2 <- image_read('./figures/4-explore-sol-space/figure-4-2-2018.png')
+img3 <- image_read('./figures/4-explore-sol-space/figure-4-3-2018.png')
+img4 <- image_read('./figures/4-explore-sol-space/figure-4-4-2018.png')
+img5 <- image_read('./figures/4-explore-sol-space/figure-4-5-2018.png')
+
+# Combine the images into a single column
+combined_img <- image_append(c(img1, img2, img3, img4, img5), stack = TRUE)
+
+combined_img
+# Save the combined image
+image_write(combined_img, 
+            path = "./figures/4-explore-sol-space/figure-SSP-2018.png", 
+            format = "png")
+ 
+```
+
+```{r}
+```
+
+```{r}
+#install.packages("magick")
+
+```
