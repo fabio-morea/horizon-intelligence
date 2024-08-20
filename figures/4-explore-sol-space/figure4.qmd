@@ -19,6 +19,9 @@ source('./code/hi_functions.R')
 # function
 
 ```{r}
+yy = 2024
+met = "LD"
+ar = .5
 
 make_figure <- function(yy, met, param, tmax, ar) {
     gy <-
@@ -29,9 +32,16 @@ make_figure <- function(yy, met, param, tmax, ar) {
     ssp <- communities::solutions_space(gy,
                                         met = met,
                                         tmax = tmax,
-                                        param = param)
+                                        resolution = param)
     
-    ssp$data <- ssp$data %>% filter(id != "New")
+    ssp <- quality_check(gy, ssp)
+    
+    ssp$data <- ssp$data %>%
+        mutate(id = if_else(valid == FALSE, 
+                               paste0("NV-",id), id))
+    
+    
+    
     nn <- nrow(ssp$data) 
     
     plotssp <- communities::plot_sol_space(ssp)
@@ -40,9 +50,7 @@ make_figure <- function(yy, met, param, tmax, ar) {
         theme(legend.position =  "none") +
         labs(title = paste0("method: ", met)) +
         theme(panel.grid.minor = element_blank(),  
-              aspect.ratio = ar)+
-        scale_y_continuous( breaks = 0.5:nn+0.5,
-                            labels = ssp$data$id|>head(nn))  
+              aspect.ratio = ar)   
     
     plot_list[[length(plot_list) + 1]] <- plotssp$pl3 +
         theme(legend.position =  "none") +
@@ -63,12 +71,68 @@ make_figure <- function(yy, met, param, tmax, ar) {
 
 ```
 
+```{r}
+# valid solutions with LD
+gy <- igraph::read.graph(file = './data/filtered-h/2024.graphml',
+format = 'graphml')
+make_figure(yy = yy, met="LD", param= 0.1, tmax=20, ar = 0.2)
+make_figure(yy = yy, met="LD", param= .99, tmax=20, ar = 0.2)
+make_figure(yy = yy, met="LD", param= 2, tmax=20, ar = 0.2) 
+```
+
+# compare methods over time
+
+```{r}
+tmax = 100
+all_results <- data.frame()
+
+for (yy in 2015:2029){
+    filename <- paste0(destination_path, yy, '.graphml')
+    print(filename)
+    gy <- igraph::read.graph(file = filename,format = 'graphml')
+    
+    for (met in c("LV", "LD", "LP", "IM", "WT")){
+
+        
+        ssp <- communities::solutions_space(gy,
+                                        met = met,
+                                        tmax = tmax,
+                                        resolution = 
+                                            if_else(met == "LV", 1.0, 1.5),
+                                        IM.nb.trials = 1,
+                                        WT.steps = 3)
+        
+        ssp <- quality_check(gy, ssp)
+        
+        n_valid_solutions <- ssp$data |> filter(valid == T) |> nrow()
+        year_met_results <- ssp$data |> 
+            select(k, k_n, mod, mu, int_conn, valid) |>
+            mutate(year = factor(yy), met = met) |>
+            mutate(n_valid_solutions = n_valid_solutions)
+        
+        
+        all_results<- rbind(all_results, year_met_results)
+        
+    }
+    
+}
+
+all_results <- all_results |> mutate(year = factor(year))
+```
+
+```{r}
+all_results %>% ggplot(aes(x = year, y = n_valid_solutions, 
+                           group = met, color = met, shape = met))+
+    geom_point()+geom_line()
+
+```
+
 # 2020
 
 ```{r}
 yy <-2020
 p1<-make_figure(yy = yy, met="LV", param= 1.0, tmax=100, ar = 0.4)
-p2<-make_figure(yy = yy, met="LD", param= 0.5, tmax=100, ar = 0.2)
+p2<-make_figure(yy = yy, met="LD", param= 1.5, tmax=20, ar = 0.2)
 p3<-make_figure(yy = yy, met="LP", param= 1.0, tmax=100, ar = 0.8)
 p4<-make_figure(yy = yy, met="IM", param= 1.0, tmax=200, ar = 0.5)
 p5<-make_figure(yy = yy, met="WT", param= 4.0, tmax=100, ar = 0.15)
