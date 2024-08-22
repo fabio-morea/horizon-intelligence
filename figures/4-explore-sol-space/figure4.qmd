@@ -19,29 +19,61 @@ source('./code/hi_functions.R')
 # function
 
 ```{r}
-yy = 2024
-met = "LD"
-ar = .5
+#yy = 2024
+#met = "LD"
+#ar = .5
 
-make_figure <- function(yy, met, param, tmax, ar) {
-    gy <-
-        igraph::read.graph(file = paste0(destination_path, yy, '.graphml'),format = 'graphml')
+# make_figure <- function(yy, met, param, n_trials, ar) {
+#     gy <-
+#         igraph::read.graph(file = paste0(destination_path, yy, '.graphml'),format = 'graphml')
+#     
+#     plot_list <- c()
+#     
+#     ssp <- communities::solutions_space(gy,
+#                                         met = met,
+#                                         n_trials = n_trials,
+#                                         resolution = param, 
+#                                         IM.nb.trials = param,
+#                                         WT.steps = param)
+#     
+#     ssp <- quality_check(gy, ssp)
+#     
+#     ssp$data <- ssp$data %>%
+#         mutate(id = if_else(valid == FALSE, 
+#                                paste0(id,"-NV"), id))
+#     
+#     
+#     
+#     nn <- nrow(ssp$data) 
+#     
+#     plotssp <- communities::plot_sol_space(ssp)
+#     
+#     plot_list[[length(plot_list) + 1]] <- plotssp$pl2 +
+#         theme(legend.position =  "none") +
+#         labs(title = paste0("method: ", met)) +
+#         theme(panel.grid.minor = element_blank(),  
+#               aspect.ratio = ar)   
+#     
+#     plot_list[[length(plot_list) + 1]] <- plotssp$pl3 +
+#         theme(legend.position =  "none") +
+#         labs(x = "community size distribution", title = " ") +
+#         theme(panel.grid.minor = element_blank(),
+#               panel.grid.major = element_blank(),
+#               axis.text.y = element_blank(),  
+#               axis.ticks.y = element_blank(),
+#               aspect.ratio = ar)+
+#         ylim(0.5,nn+0.5) 
+#     
+#     return(plot_grid(
+#         plotlist = plot_list,
+#         ncol = 2,
+#         nrow = 1))
+# 
+# }
+
+make_figure_ssp <- function(ssp, met, ar) {
     
     plot_list <- c()
-    
-    ssp <- communities::solutions_space(gy,
-                                        met = met,
-                                        tmax = tmax,
-                                        resolution = param)
-    
-    ssp <- quality_check(gy, ssp)
-    
-    ssp$data <- ssp$data %>%
-        mutate(id = if_else(valid == FALSE, 
-                               paste0("NV-",id), id))
-    
-    
-    
     nn <- nrow(ssp$data) 
     
     plotssp <- communities::plot_sol_space(ssp)
@@ -62,6 +94,17 @@ make_figure <- function(yy, met, param, tmax, ar) {
               aspect.ratio = ar)+
         ylim(0.5,nn+0.5) 
     
+    # df <- data.frame( x = ssp$simil[upper.tri(ssp$simil,diag = FALSE)] ) 
+    # 
+    # 
+    #  <- df%>%
+    #     ggplot() + geom_histogram(aes(y = x), color = 'white', fill = 'gray')+
+    #     theme_minimal()+theme(aspect.ratio = 3)+
+    #     geom_hline(yintercept = 1.0)+
+    #     geom_hline(yintercept = 0.5)+
+    #     geom_hline(yintercept = 0.0)+
+    #     labs(y = "similarity")
+    # 
     return(plot_grid(
         plotlist = plot_list,
         ncol = 2,
@@ -71,19 +114,50 @@ make_figure <- function(yy, met, param, tmax, ar) {
 
 ```
 
+# testing critical methods
+
+\# EV may not converge for larger graphs. it generates an errore fot yy
+= 2024.
+
+#igraph::cluster_leading_eigen(gy, options = list(maxiter = 10000, tol =
+1e-10))
+
+EB is extremely slow, so it is unpractical to explore solution space.
+Moreover, the solutions are not similar to each other (test in 2018, t =
+10: similarity is often below 0.5)
+
+Morever EB for yy = 2024 it generates an error.
+
+# 
+
 ```{r}
-# valid solutions with LD
-gy <- igraph::read.graph(file = './data/filtered-h/2024.graphml',
+
+gy <- igraph::read.graph(file = './data/filtered-h/2018.graphml',
 format = 'graphml')
-make_figure(yy = yy, met="LD", param= 0.1, tmax=20, ar = 0.2)
-make_figure(yy = yy, met="LD", param= .99, tmax=20, ar = 0.2)
-make_figure(yy = yy, met="LD", param= 2, tmax=20, ar = 0.2) 
+
+
+# EB generates error in 2024
+# EB generates divergent results in 2018 (similariy nearly 0!t)
+###tmp<-igraph::cluster_edge_betweenness(gy)
+
+# ssp <- communities::solutions_space(gy,
+#                                      met = "EB",
+#                                      n_trials = 10)
+#  ssp <- quality_check(gy,ssp)
+#  
+# ssp$data <- ssp$data %>%
+#          mutate(id = if_else(valid == FALSE, paste0(id, "*NV"), id))
+#  
+# plot_sol_space(ssp)
+# make_figure_ssp(ssp, met = "testing...", ar = 0.6) 
+
+
 ```
 
 # compare methods over time
 
 ```{r}
-tmax = 100
+n_trials = 100
 all_results <- data.frame()
 
 for (yy in 2015:2029){
@@ -91,24 +165,36 @@ for (yy in 2015:2029){
     print(filename)
     gy <- igraph::read.graph(file = filename,format = 'graphml')
     
-    for (met in c("LV", "LD", "LP", "IM", "WT")){
-
+    for (met in c("LV", "LD", "LP", "IM", "WT" )){
+        # EV may not converge for larger graphs
+        # EB is very slow and may result in a single community ie not valid
+        # LD produces non valid results
+        # LV produces disconnected communities
+        # WT produced large comms and singletons, non valid
         
         ssp <- communities::solutions_space(gy,
                                         met = met,
-                                        tmax = tmax,
-                                        resolution = 
-                                            if_else(met == "LV", 1.0, 1.5),
+                                        n_trials = n_trials,
+                                        resolution = 1.0,
                                         IM.nb.trials = 1,
                                         WT.steps = 3)
         
         ssp <- quality_check(gy, ssp)
         
+        ssp$data <- ssp$data %>%
+            mutate(id = if_else(valid == FALSE, 
+                               paste0(id,"-NV"), id))
+        
+       
+        
         n_valid_solutions <- ssp$data |> filter(valid == T) |> nrow()
+        n_solutions <- ssp$data |> nrow()
         year_met_results <- ssp$data |> 
             select(k, k_n, mod, mu, int_conn, valid) |>
             mutate(year = factor(yy), met = met) |>
-            mutate(n_valid_solutions = n_valid_solutions)
+            mutate(n_valid_solutions = n_valid_solutions)|>
+            mutate(n_solutions = n_solutions)
+
         
         
         all_results<- rbind(all_results, year_met_results)
@@ -118,122 +204,195 @@ for (yy in 2015:2029){
 }
 
 all_results <- all_results |> mutate(year = factor(year))
+
+all_results |> write_csv("all_results.csv")
+```
+
+plot
+
+```{r}
+all_results <-read_csv("all_results.csv")
+all_results$yy <- as.numeric(all_results$year)
+# 
+# all_results %>% ggplot(aes(x = yy, y = n_valid_solutions, 
+#                            group = met, color = met, shape = met))+
+#     geom_point(size = 4)+ theme_light() + scale_y_log10()+
+#     geom_vline(aes(xintercept = yy), color = "gray", alpha = 0.5, linewidth = 2) +
+#   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+all_results %>% ggplot(aes(x = year, y = n_valid_solutions, group = year))+
+    geom_boxplot() + facet_wrap( ~met, scales = "free") + theme_light()
+
 ```
 
 ```{r}
-all_results %>% ggplot(aes(x = year, y = n_valid_solutions, 
-                           group = met, color = met, shape = met))+
-    geom_point()+geom_line()
+# Calculate the minimum and maximum values for each year
+year_limits <- all_results %>%
+    filter(met != "LD") %>%
+    group_by(year) %>%
+    summarize(min_y = min(n_valid_solutions),
+              max_y = max(n_valid_solutions))
 
-```
+# Create the plot
+plot_n_solutions <- all_results %>% filter(met != "LD") %>%
+    ggplot(aes(x = year,
+               y = n_valid_solutions, shape = met)) +
+   geom_segment(
+        data = year_limits,
+        aes(
+            x = year,
+            xend = year,
+            y = min_y,
+            yend = max_y
+        ),
+        linewidth = 6,
+        color = "gray",
+        alpha = 0.5
+    ) +
+    geom_point(size = 3) +
+    scale_shape_manual(values = c(1, 0, 2, 4)) + # Hollow circle, square, triangle, X
+    theme_light() +
+    theme(aspect.ratio = .4)+
+    scale_y_log10() +
+    
+    scale_x_continuous(breaks = unique(all_results$year)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        panel.grid.major.x = element_blank(),  # Remove major gridlines
+        panel.grid.minor = element_blank()) + # Remove minor gridlines
+labs(
+    #title = "Number of Valid Solutions by Year",
+    x = "Year",
+    y = "Number of Valid Solutions",
+    shape = "Method"
+  )
 
-# 2020
-
-```{r}
-yy <-2020
-p1<-make_figure(yy = yy, met="LV", param= 1.0, tmax=100, ar = 0.4)
-p2<-make_figure(yy = yy, met="LD", param= 1.5, tmax=20, ar = 0.2)
-p3<-make_figure(yy = yy, met="LP", param= 1.0, tmax=100, ar = 0.8)
-p4<-make_figure(yy = yy, met="IM", param= 1.0, tmax=200, ar = 0.5)
-p5<-make_figure(yy = yy, met="WT", param= 4.0, tmax=100, ar = 0.15)
-
-p1
-p2
-p3
-p4
-p5
-
-ggsave('./figures/4-explore-sol-space/figure-4-1-2020.png', 
-       plot = p1, 
-       width = 10, height = 3, dpi = 300)
- 
-ggsave('./figures/4-explore-sol-space/figure-4-2-2020.png', 
-       plot = p2, 
-       width = 10, height = 2, dpi = 300)
-
-ggsave('./figures/4-explore-sol-space/figure-4-3-2020.png', 
-       plot = p3, 
-       width = 10, height = 5, dpi = 300)
-
-ggsave('./figures/4-explore-sol-space/figure-4-4-2020.png', 
-       plot = p4, 
+plot_n_solutions
+ggsave('./figures/4-explore-sol-space/figure-n_solutions.png', 
+       plot = plot_n_solutions, 
        width = 10, height = 4, dpi = 300)
+```
 
-ggsave('./figures/4-explore-sol-space/figure-4-5-2020.png', 
-       plot = p5, 
-       width = 10, height = 1.5, dpi = 300)
+plot to comment the % of NON valid solutions
 
-img1 <- image_read('./figures/4-explore-sol-space/figure-4-1-2020.png')
-img2 <- image_read('./figures/4-explore-sol-space/figure-4-2-2020.png')
-img3 <- image_read('./figures/4-explore-sol-space/figure-4-3-2020.png')
-img4 <- image_read('./figures/4-explore-sol-space/figure-4-4-2020.png')
-img5 <- image_read('./figures/4-explore-sol-space/figure-4-5-2020.png')
+```{r}
+all_results %>% 
+    mutate(perc_valid = n_valid_solutions/n_solutions) %>%
+    ggplot(aes(x = met, y = perc_valid))+
+    geom_boxplot() 
 
+```
+
+# plot single year quality check
+
+```{r}
+yy <-2024
+filename <- paste0(destination_path, yy, '.graphml')
+gy <- igraph::read.graph(file = filename,format = 'graphml')
+ 
+```
+
+```{r}
+met = "LV" 
+n_trials <-100
+
+ssp <- communities::solutions_space(gy,
+                                        met = met,
+                                        n_trials = n_trials,
+                                        resolution = 1.0 )
+ssp <- quality_check(gy, ssp)
+ssp$data <- ssp$data %>%
+    mutate(id = if_else(valid == FALSE, paste0(id,"-NV"), id)) %>%
+    head(10)
+
+p1<-make_figure_ssp(ssp, met=met, ar = .9)
+filefigure1 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
+ggsave(filefigure1, 
+       plot = p1, 
+       width = 10, height = 4, dpi = 300)
+p1
+hist(ssp$simil)
+```
+
+```{r}
+met = "LP"
+n_trials = 100
+ssp <- communities::solutions_space(gy,
+                                        met = met,
+                                        n_trials = n_trials)
+ssp <- quality_check(gy, ssp)
+ssp$data <- ssp$data %>%
+    mutate(id = if_else(valid == FALSE, paste0(id,"-NV"), id)) %>%
+    head(10)
+
+p2 <- make_figure_ssp(ssp|>head(10), 
+                      met=met, ar = .9)
+filefigure2 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
+ggsave(filefigure2, 
+       plot = p2, 
+       width = 10, height = 3, dpi = 300)
+p2
+
+hist(ssp$simil)
+
+```
+
+```{r}
+met = "IM"
+n_trials=100
+ssp <- communities::solutions_space(gy,
+                                        met = met,
+                                        n_trials = n_trials,
+                                        IM.nb.trials = 1)       
+ssp <- quality_check(gy, ssp)
+ssp$data <- ssp$data %>%
+            mutate(id = if_else(valid == FALSE, 
+                               paste0(id,"-NV"), id))
+p3<-make_figure_ssp(ssp, met=met, ar = 0.8)
+filefigure3 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
+ggsave(filefigure3, 
+       plot = p3, 
+       width = 10, height = 3, dpi = 300)
+p3
+
+
+hist(ssp$simil)
+```
+
+```{r}
+met = "WT"
+ssp <- communities::solutions_space(gy,
+                                        met = met,
+                                        n_trials = n_trials, 
+                                        WT.steps = 3)
+        ssp <- quality_check(gy, ssp)
+        ssp$data <- ssp$data %>%
+            mutate(id = if_else(valid == FALSE, 
+                               paste0(id,"-NV"), id))
+p4 <-make_figure_ssp(ssp, met=met, ar = 0.5)
+
+filefigure4 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
+ggsave(filefigure4, 
+       plot = p4, 
+       width = 10, height = 2, dpi = 300)
+p4
+
+
+  
+
+```
+
+```{r}
+
+img1 <- image_read(filefigure1)
+img2 <- image_read(filefigure2)
+img3 <- image_read(filefigure3)
+img4 <- image_read(filefigure4)
+ 
 # Combine the images into a single column
-combined_img <- image_append(c(img1, img2, img3, img4, img5), stack = TRUE)
+combined_img <- image_append(c(img1, img2, img3, img4), stack = TRUE)
 
-combined_img
 # Save the combined image
 image_write(combined_img, 
-            path = "./figures/4-explore-sol-space/figure-SSP-2020.png", 
+            path = paste0("./figures/4-explore-sol-space/figure-SSP-",yy,".png"), 
             format = "png")
-```
-
-```{r}
-yy <-2018
-p1<-make_figure(yy = yy, met="LV", param= 1.0, tmax=100, ar = 0.4)
-p2<-make_figure(yy = yy, met="LD", param= 0.5, tmax=100, ar = 0.2)
-p3<-make_figure(yy = yy, met="LP", param= 1.0, tmax=20, ar = 0.8)
-p4<-make_figure(yy = yy, met="IM", param= 1.0, tmax=100, ar = 0.5)
-p5<-make_figure(yy = yy, met="WT", param= 4.0, tmax=100, ar = 0.15)
-
-p1
-p2
-p3
-p4
-p5
-
-ggsave('./figures/4-explore-sol-space/figure-4-1-2018.png', 
-       plot = p1, 
-       width = 10, height = 3, dpi = 300)
- 
-ggsave('./figures/4-explore-sol-space/figure-4-2-2018.png', 
-       plot = p2, 
-       width = 10, height = 2, dpi = 300)
-
-ggsave('./figures/4-explore-sol-space/figure-4-3-2018.png', 
-       plot = p3, 
-       width = 10, height = 5, dpi = 300)
-
-ggsave('./figures/4-explore-sol-space/figure-4-4-2018.png', 
-       plot = p4, 
-       width = 10, height = 4, dpi = 300)
-
-ggsave('./figures/4-explore-sol-space/figure-4-5-2018.png', 
-       plot = p5, 
-       width = 10, height = 1.5, dpi = 300)
-
-img1 <- image_read('./figures/4-explore-sol-space/figure-4-1-2018.png')
-img2 <- image_read('./figures/4-explore-sol-space/figure-4-2-2018.png')
-img3 <- image_read('./figures/4-explore-sol-space/figure-4-3-2018.png')
-img4 <- image_read('./figures/4-explore-sol-space/figure-4-4-2018.png')
-img5 <- image_read('./figures/4-explore-sol-space/figure-4-5-2018.png')
-
-# Combine the images into a single column
-combined_img <- image_append(c(img1, img2, img3, img4, img5), stack = TRUE)
-
-combined_img
-# Save the combined image
-image_write(combined_img, 
-            path = "./figures/4-explore-sol-space/figure-SSP-2018.png", 
-            format = "png")
- 
-```
-
-```{r}
-```
-
-```{r}
-#install.packages("magick")
-
 ```
