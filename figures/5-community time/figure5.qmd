@@ -46,11 +46,14 @@ dev.off()
 
 ```{r}
 
-yy=2017
+yy=2018
 g <- read.graph(file = paste0('data/filtered-h/',yy,'.graphml'),format = 'graphml')
-E(g)$weight <- E(g)$weight %>% round(2)
-g <- delete_edges(g, E(g)[weight == 0])
-g <- delete_vertices(g, degree(g) ==0)
+vcount(g)
+
+#g <- delete_edges(g, E(g)[weight <.001])
+#g <- delete_vertices(g, degree(g) ==0)
+vcount(g)
+
 
 par(mar=c(0,0,0,0))
 lo <- layout.fruchterman.reingold(g)
