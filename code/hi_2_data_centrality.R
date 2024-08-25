@@ -32,12 +32,14 @@ orgs <- read_csv('./data/orgs.csv', show_col_types = TRUE)
 prjs <- read_csv('./data/project_topic_esv.csv', show_col_types = TRUE) %>%
     select(-level1) %>% rename(esv_topic = euroSciVocTitle)
 
-
-
-
 objectives <- read_csv('./data/prj_objectives.csv', show_col_types = TRUE)  
 
 participation <- read_csv('./data/participation.csv')
+
+AIcategories <- read_delim(paste0(destination_path,'AI_tech_market.csv'),
+                         show_col_types = TRUE) %>%
+    select(projID, tech)
+
 
 ######## subset based on keyword
 
@@ -55,6 +57,10 @@ print(paste("selected projects: ", nrow(projects)))
 selected_projects <- unique(projects$projID)
 participation <- participation %>% 
     filter(projID %in% selected_projects)  
+
+# data enriched by AI generated categries
+projects <- merge(projects, AIcategories, by = "projID")
+#mean(projects$tech)
 
 selected_orgs <- orgs %>% 
     filter(orgID %in% unique(participation$orgID)) %>%
@@ -105,18 +111,43 @@ participation %>% write_csv(paste0(destination_path,'participation.csv'))
 part <- participation
 part %>% ggplot()+geom_histogram(aes(x = weight))
 
+
+
 centrality_measures <- data.frame()
 
 par(mar = rep(1,4))
 ystart = min(part$year)
 yend = max(part$year)
+# yy = 2018
 for (yy in ystart:yend ) {
     print(yy)
-    part_y <- part %>% filter(year == yy)
-    gi <- part_y %>%
-        select(projID, orgID, weight) %>%
-        mutate(weight = weight / 1000) %>%
+    part_y <- part %>% filter(year == yy) 
+    
+    # gi <- part_y %>%
+    #     select(projID, orgID, weight) %>%
+    #     mutate(weight = weight / 1000) %>%
+    #     make_orgs_network(network_name = paste("Y", yy))
+    ############ AI enriched categories in graph ##########
+    g_tech <- part_y %>%
+        select(projID, orgID, weight, tech) %>%
+        filter(tech == TRUE) %>%
         make_orgs_network(network_name = paste("Y", yy))
+    E(g_tech)$tech <- TRUE
+    dft<-igraph::as_data_frame(g_tech, what = "edges")
+    
+    
+    g_market <- part_y %>%
+        select(projID, orgID, weight, tech) %>%
+        filter(tech == FALSE) %>%
+        make_orgs_network(network_name = paste("Y", yy))
+    E(g_market)$tech <- FALSE
+    dfm<-igraph::as_data_frame(g_market, what = "edges")
+    
+    dfi <- rbind(dfm,dft)
+    gi <- graph_from_data_frame(dfi, directed = FALSE)
+    
+     
+    ########################################àà
     
     E(gi)$weight <- E(gi)$weight %>% round(6)   
     gi <- delete_edges(gi, E(gi)[weight == 0])
@@ -130,8 +161,6 @@ for (yy in ystart:yend ) {
     V(gi)$core <- coreness(gi)
  
 
-    
- 
     gi %>% igraph::write.graph(file = paste0(destination_path, yy, '.graphml' ), 
                                format = 'graphml')
     
