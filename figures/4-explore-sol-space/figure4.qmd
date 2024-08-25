@@ -26,6 +26,7 @@ source('./code/hi_functions.R')
 # make_figure <- function(yy, met, param, n_trials, ar) {
 #     gy <-
 #         igraph::read.graph(file = paste0(destination_path, yy, '.graphml'),format = 'graphml')
+#     gy <- igraph::simplify(gy, edge.attr.comb = 'sum')
 #     
 #     plot_list <- c()
 #     
@@ -134,6 +135,7 @@ Morever EB for yy = 2024 it generates an error.
 
 gy <- igraph::read.graph(file = './data/filtered-h/2018.graphml',
 format = 'graphml')
+gy <- igraph::simplify(gy, edge.attr.comb = 'sum')
 
 
 # EB generates error in 2024
@@ -164,13 +166,20 @@ for (yy in 2015:2029){
     filename <- paste0(destination_path, yy, '.graphml')
     print(filename)
     gy <- igraph::read.graph(file = filename,format = 'graphml')
+    gy <- igraph::simplify(gy, edge.attr.comb = 'sum')
+    min_weight <- quantile(E(gy)$weight, .1)
+    gy <- delete_edges(gy, E(gy)[weight <= min_weight])
+    gy <- delete_vertices(gy, V(gy)[degree(gy) == 0])
     
-    for (met in c("LV", "LD", "LP", "IM", "WT" )){
+    
+    for (met in c("LV", "LP", "IM", "WT" )){
         # EV may not converge for larger graphs
         # EB is very slow and may result in a single community ie not valid
-        # LD produces non valid results
+        # LD produces no valid results
         # LV produces disconnected communities
-        # WT produced large comms and singletons, non valid
+        # WT produced large comms and singletons, none is valid
+        # LP produces a high number of solutions, some are not valid
+        # IM is good.
         
         ssp <- communities::solutions_space(gy,
                                         met = met,
@@ -180,7 +189,7 @@ for (yy in 2015:2029){
                                         WT.steps = 3)
         
         ssp <- quality_check(gy, ssp)
-        
+        print(paste(met, sum(ssp$data$valid)))
         ssp$data <- ssp$data %>%
             mutate(id = if_else(valid == FALSE, 
                                paste0(id,"-NV"), id))
@@ -288,6 +297,7 @@ all_results %>%
 yy <-2024
 filename <- paste0(destination_path, yy, '.graphml')
 gy <- igraph::read.graph(file = filename,format = 'graphml')
+gy <- igraph::simplify(gy, edge.attr.comb = 'sum')
  
 ```
 
@@ -395,4 +405,8 @@ combined_img <- image_append(c(img1, img2, img3, img4), stack = TRUE)
 image_write(combined_img, 
             path = paste0("./figures/4-explore-sol-space/figure-SSP-",yy,".png"), 
             format = "png")
+```
+
+```{r}
+
 ```

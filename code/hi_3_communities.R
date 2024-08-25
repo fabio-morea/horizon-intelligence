@@ -51,25 +51,36 @@ co_occurrence <- function(M, names, alpha) {
     return (CO)
 }
 
+yy = 2024
 results <- data.frame()
 for (yy in miny:maxy) {
     print(yy)
     gy <- igraph::read.graph(
         file = paste0(destination_path, yy, '.graphml'),format = 'graphml')
     
-    gy <- delete_edges(gy, E(gy)[weight == 0])
+    # there are multiple edges (using AI-generated boolean flag E(gy)$tech)
+    gy <- igraph::simplify(gy, edge.attr.comb = 'sum')
     
-    gy <- delete_vertices(gy, V(gy)[degree(gy) < 2])
+    # remove thin connections 
+    #min_weight <- quantile( E(gy)$weight, .1)
+    #gy <- delete_edges(gy, E(gy)[weight < min_weight])
+    
+    # remove singletons
+    #gy <- delete_vertices(gy, V(gy)[degree(gy) <= 1])
+    
+    print(paste(vcount(gy), ecount(gy)))
+    
+    hist(E(gy)$weight)
+    
     
     if(vcount(gy)==1){next}
     
     
     ssp <- communities::solutions_space(gy,
-                                        tmax = 200,
-                                        met = community_detection_method,
-                                        param = param)
+                                        n_trials = 200,
+                                        met = community_detection_method, 
+                                        IM.nb.trials = 1)
     
-    ssp$data <- ssp$data %>% filter(id != "New")
     communities::plot_sol_space(ssp)$pl2 +
         ggtitle(paste("Solution space year", yy, "steps = ", param))
     

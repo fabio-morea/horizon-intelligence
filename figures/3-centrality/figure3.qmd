@@ -26,18 +26,18 @@ summary_ts <- centrality_measures %>%
 
 max_total_str =  summary_ts %>% 
     arrange(-total_strength) %>%
-    head(100) %>% distinct(orgID) %>% pull(orgID) 
+    head(1000) %>% distinct(orgID) %>% pull(orgID) 
 
 min_total_str = summary_ts %>% 
     filter(total_strength<5000) %>% 
     distinct(orgID) %>% pull(orgID)
 
 not_null_in_1 <- centrality_measures %>%
-    filter(year == "Y2016", coreness >1)%>%
+    filter(year == "Y2018", coreness >1)%>%
     pull(orgID)
 
 not_null_in_2 <- centrality_measures %>%
-    filter(year == "Y2028", coreness >1)%>%
+    filter(year == "Y2025", coreness >1)%>%
     pull(orgID)
     
 
@@ -45,10 +45,14 @@ intersection <- intersect(min_total_str, max_total_str)
 intersection <- intersection %>%
     intersect( not_null_in_1)  %>%
     intersect( not_null_in_2) %>%
-    head(6)
+    head(5) 
+
+intersection <- c("o914772275", intersection)
 
 length(intersection)
 ```
+
+\
 
 ```{r}
 
@@ -77,4 +81,6 @@ centrality_measures %>%
     labs(x = "year")
 
 #dev.off()
+
+
 ```

@@ -34,7 +34,9 @@ prjs <- read_csv('./data/project_topic_esv.csv', show_col_types = TRUE) %>%
 
 objectives <- read_csv('./data/prj_objectives.csv', show_col_types = TRUE)  
 
-participation <- read_csv('./data/participation.csv')
+participation <- read_csv('./data/participation.csv') %>%
+    mutate(totalCost = round(totalCost, 3)) %>%
+    arrange(totalCost)
 
 AIcategories <- read_delim(paste0(destination_path,'AI_tech_market.csv'),
                          show_col_types = TRUE) %>%
@@ -114,6 +116,9 @@ part %>% ggplot()+geom_histogram(aes(x = weight))
 
 
 centrality_measures <- data.frame()
+centrality_measures_tech <- data.frame()
+centrality_measures_market <- data.frame()
+
 
 par(mar = rep(1,4))
 ystart = min(part$year)
@@ -150,7 +155,7 @@ for (yy in ystart:yend ) {
     ########################################àà
     
     E(gi)$weight <- E(gi)$weight %>% round(6)   
-    gi <- delete_edges(gi, E(gi)[weight == 0])
+    gi <- delete_edges(gi, E(gi)[weight <= .0001])
     gi <- delete_vertices(gi, V(gi)[degree(gi) == 0])
     if(vcount(gi)==0){next}
     
@@ -171,10 +176,35 @@ for (yy in ystart:yend ) {
                      degree = V(gi)$deg,
                      strength = V(gi)$str, 
                      R_strength = V(gi)$R_strength, 
-                     
                      coreness = V(gi)$core)
-    
     centrality_measures <- rbind(centrality_measures, df)
+    
+    
+    V(g_tech)$deg <- degree(g_tech)
+    V(g_tech)$str <- strength(g_tech)
+    V(g_tech)$R_strength <- ifelse(
+        V(g_tech)$str == 0, 0, V(g_tech)$str / max(V(g_tech)$str))  
+    V(g_tech)$core <- coreness(g_tech)
+    df_tech <- data.frame(year = paste0("Y", yy),
+                     orgID = V(g_tech)$name,
+                     degree = V(g_tech)$deg,
+                     strength = V(g_tech)$str, 
+                     R_strength = V(g_tech)$R_strength, 
+                     coreness = V(g_tech)$core)
+    centrality_measures_tech <- rbind(centrality_measures_tech, df_tech)
+    
+    V(g_market)$deg <- degree(g_market)
+    V(g_market)$str <- strength(g_market)
+    V(g_market)$R_strength <- ifelse(
+        V(g_market)$str == 0, 0, V(g_market)$str / max(V(g_market)$str))  
+    V(g_market)$core <- coreness(g_market)
+    df_market <- data.frame(year = paste0("Y", yy),
+                          orgID = V(g_market)$name,
+                          degree = V(g_market)$deg,
+                          strength = V(g_market)$str, 
+                          R_strength = V(g_market)$R_strength, 
+                          coreness = V(g_market)$core)
+    centrality_measures_market <- rbind(centrality_measures_market, df_market)
     
     
     # plot(gi,
@@ -190,8 +220,13 @@ for (yy in ystart:yend ) {
     #as_long_data_frame(gi) %>% write_csv(paste0(destination_path,"df_Y", yy, '.csv'))
 }
 
-centrality_measures %>% write_csv(paste0(destination_path,'centrality_measures.csv'))
+centrality_measures %>% 
+    write_csv(paste0(destination_path,'centrality_measures.csv'))
 
- 
+centrality_measures_market %>% 
+    write_csv(paste0(destination_path,'centrality_measures_market.csv'))
+
+centrality_measures_tech %>% 
+    write_csv(paste0(destination_path,'centrality_measures_tech.csv'))
 
 print("Done :-D")
