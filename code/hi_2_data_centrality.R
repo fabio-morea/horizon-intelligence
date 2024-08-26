@@ -110,11 +110,6 @@ participation %>% write_csv(paste0(destination_path,'participation.csv'))
 
 
 
-part <- participation
-part %>% ggplot()+geom_histogram(aes(x = weight))
-
-
-
 centrality_measures <- data.frame()
 centrality_measures_tech <- data.frame()
 centrality_measures_market <- data.frame()

@@ -13,33 +13,46 @@ source('./code/hi_functions.R')
 ```
 
 ```{r}
-perc_tech <- c()
-for(yy in 2015:2026){
+
+for(yy in 2016:2016){
+    print(yy)
     
-print(yy)
-g <- read.graph(file = paste0('data/filtered-h/',yy,'.graphml'),format = 'graphml') |> igraph::simplify(edge.attr.comb = "sum") 
+    # Load the graph
+    g <- read.graph(file = paste0('data/filtered-h/', yy, '.graphml'),
+                   format = 'graphml')
+    
+    # Step 1: Extract Subgraph with 'tech' edges (tech == TRUE)
+    g_tech <- delete_edges(g, E(g)[E(g)$tech == FALSE])
+    g_tech <- delete_vertices(g_tech, V(g_tech)[degree(g_tech) == 0])
+    
+    # Step 2: Extract Subgraph with 'market' edges (tech == FALSE)
+    g_market <- delete_edges(g, E(g)[E(g)$tech == TRUE])
+    g_market <- delete_vertices(g_market, V(g_market)[degree(g_market) == 0])
+    
+    # Step 3: Create Data Frame with Vertex Attributes
+    df_org <- tibble(orgID = V(g)$name,
+                     weight = V(g)$str)
+    
+    
+    df_tech <- tibble(orgID = V(g_tech)$name,
+                      weight_tech = V(g_tech)$str)
+    
+    df_market <- tibble(orgID = V(g_market)$name,
+                        weight_market = V(g_market)$str)
 
-E(g)$weight |> plot()
+    # Step 4: Join data frames to merge the weights back into the original orgID list
+    dfstr <- df_tech %>%
+        #left_join(df_tech, by = "orgID") %>%
+        left_join(df_market, by = "orgID") %>%
+        mutate(            # Replace NA with 0.0 for missing weights
+            weight_tech = coalesce(weight_tech, 0.0),
+            weight_market = coalesce(weight_market, 0.0) 
+        )
 
-E(g)$weight <- E(g)$weight  %>% round(0)
-g <- delete_edges(g, E(g)[weight <= 0.0])
-g <- delete_vertices(g, V(g)[degree(g) ==0])
-perc_tech<- c(perc_tech, mean(E(g)$tech))
-#png(paste0('./figures/2-full network/',yy,'.png'))
-par(mar=c(0,0,0,0))
-plot(g, vertex.label = NA, 
-     vertex.size = V(g)$str/50 ,
-     layout = layout.fruchterman.reingold(g), 
-     main = yy, 
-     asp = .5)
-#dev.off()
+
 }
+ dfstr |> arrange(-weight)
 
-bubblesize <- sqrt(V(g)$str)|> round(0)
-hist(bubblesize)
-g |> igraph::as_data_frame() -> tmp
-V(g)$str |> plot()
-V(g)$weight
 ```
 
 ```{r}
@@ -57,7 +70,9 @@ g <- read.graph(file = paste0('data/filtered-h/',yy,'.graphml'),format = 'graphm
 print(paste("G: ", mean(E(g)$tech), "vertices: ", vcount(g), "edges: ", ecount(g)))
 
 g <- delete_edges(g,  E(g)[E(g)$tech == FALSE] )
-g <- delete_vertices(g, V(g)[degree(g) ==0])|> igraph::simplify(edge.attr.comb = "sum")
+
+g_market <- delete_edges(g,  E(g)[E(g)$tech == TRUE] )
+
 g <- igraph::simplify(g, edge.attr.comb = "sum")
 print(paste("G: ", mean(E(g)$tech), "vertices: ", vcount(g), "edges: ", ecount(g)))
 

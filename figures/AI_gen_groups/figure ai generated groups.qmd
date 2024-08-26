@@ -1,0 +1,75 @@
+---
+title: "figure AI generated groups"
+format: html
+editor: visual
+---
+
+## 
+
+```{r}
+
+source('./code/hi_0_parameters.R')
+source('./code/hi_functions.R')
+
+# libraries
+
+library(tidyverse)
+library(lubridate)
+library(igraph)
+library(communities)
+```
+
+```{r}
+
+part <- read_csv(paste0(destination_path, 'participation.csv')) %>%
+    mutate(year = as.factor(year),
+           tech = as.factor(tech))
+
+part_summary <- part %>%
+    group_by(year, tech) %>%  # Group by 'year' and 'tech'
+    summarize(total_weight = sum(weight, na.rm = TRUE),
+              .groups = "drop")   %>%
+    mutate(total_weight = total_weight/1e6)
+ 
+
+# Assuming 'part_summary' is your summarized dataframe
+
+pl1 <- part_summary %>%
+  ggplot(aes(x = as.factor(year), y = total_weight, fill = tech)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +  
+  scale_fill_manual(
+    values = c("TRUE" = "blue", "FALSE" = "red"),
+    labels = c("TRUE" = "Technology", "FALSE" = "Market")
+  ) +
+  labs(
+    x = "Year",
+    y = "Total cost [M€]",
+    fill = "AI Generated Groups"
+  ) +
+    theme_minimal()+
+  theme(
+    aspect.ratio = 0.5,
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),  # Rotate x-axis labels vertically
+    panel.grid.major.x = element_blank(),  # Remove major gridlines on the x-axis
+    panel.grid.minor.x = element_blank(),  # Remove minor gridlines on the x-axis
+    panel.grid.minor.y = element_blank()   # Remove minor gridlines on the y-axis
+  ) +
+    ylim(0,6)
+# Print the plot
+pl1
+
+png(
+  filename = paste0('./figures/AI_gen_groups/AI_gen_groups.png'),
+  bg = 'white',
+  width = 16, 
+  height = 8, 
+  units = "cm",
+  res = 300  # Optional: Set resolution for better quality
+)
+
+# Print the plot to the PNG device
+print(pl1)
+
+dev.off()
+
+```
