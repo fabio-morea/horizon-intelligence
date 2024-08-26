@@ -104,7 +104,7 @@ participation <- df %>%
     filter(weight > 0) 
 
 participation %>% write_csv(paste0(destination_path,'participation.csv'))
-
+part <-participation
 
 ######### network centrality measures ######### ######### 
 
@@ -118,7 +118,7 @@ centrality_measures_market <- data.frame()
 par(mar = rep(1,4))
 ystart = min(part$year)
 yend = max(part$year)
-# yy = 2018
+
 for (yy in ystart:yend ) {
     print(yy)
     part_y <- part %>% filter(year == yy) 
@@ -133,6 +133,8 @@ for (yy in ystart:yend ) {
         filter(tech == TRUE) %>%
         make_orgs_network(network_name = paste("Y", yy))
     E(g_tech)$tech <- TRUE
+    E(g_tech)$weight <- E(g_tech)$weight %>% round(3)
+    g_tech <- delete.edges(g_tech, which(E(g_tech)$weight <.001) )
     dft<-igraph::as_data_frame(g_tech, what = "edges")
     
     
@@ -141,6 +143,8 @@ for (yy in ystart:yend ) {
         filter(tech == FALSE) %>%
         make_orgs_network(network_name = paste("Y", yy))
     E(g_market)$tech <- FALSE
+    E(g_market)$weight <- E(g_market)$weight %>% round(3)
+    g_market <- delete.edges(g_market, which(E(g_market)$weight <.001) )
     dfm<-igraph::as_data_frame(g_market, what = "edges")
     
     dfi <- rbind(dfm,dft)
@@ -201,27 +205,30 @@ for (yy in ystart:yend ) {
                           coreness = V(g_market)$core)
     centrality_measures_market <- rbind(centrality_measures_market, df_market)
     
-    
-    # plot(gi,
-    #      vertex.color =  "white",
-    #      vertex.label = NA,
-    #      vertex.size = 10*V(gi)$R_strength,
-    #      edge.width = E(gi)$weight ,
-    #      layout = layout.fruchterman.reingold(gi),
-    #      main =  paste0("Y", yy)
-    # )
-    
-    # to save in a different formt
-    #as_long_data_frame(gi) %>% write_csv(paste0(destination_path,"df_Y", yy, '.csv'))
+
 }
 
-centrality_measures %>% 
+
+
+centrality_measures <- centrality_measures %>% mutate(scope = "all")
+centrality_measures_tech <- centrality_measures_tech %>% mutate(scope = "tech")
+centrality_measures_market <- centrality_measures_market %>% mutate(scope = "market")
+
+centrality_measures <- rbind(centrality_measures,centrality_measures_tech)
+centrality_measures <- rbind(centrality_measures,centrality_measures_market)
+
+centrality_measures <- centrality_measures %>%
+    mutate(yy = substr(year, 2, 5) )
+centrality_measures%>% 
     write_csv(paste0(destination_path,'centrality_measures.csv'))
 
-centrality_measures_market %>% 
-    write_csv(paste0(destination_path,'centrality_measures_market.csv'))
-
-centrality_measures_tech %>% 
-    write_csv(paste0(destination_path,'centrality_measures_tech.csv'))
+centrality_measures %>% 
+    #filter(scope == "all") %>%
+    ggplot()+
+    geom_boxplot(aes(x = yy, y = coreness, group = yy))
 
 print("Done :-D")
+
+
+
+
