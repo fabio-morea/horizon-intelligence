@@ -13,12 +13,130 @@ source('./code/hi_functions.R')
 ```
 
 ```{r}
-centrality_measures <- read_csv(paste0(destination_path,'centrality_measures.csv'))
+centrality_measures <- read_csv(paste0(destination_path,'centrality_measures.csv')) %>%
+    mutate(scope = "all")
+
+
+
+centrality_measures <- 
+    rbind(centrality_measures,
+          read_csv(paste0(destination_path,'centrality_measures_tech.csv')) %>% mutate(scope = "tech"))
+
+
+centrality_measures <- 
+    rbind(centrality_measures,
+          read_csv(paste0(destination_path,'centrality_measures_market.csv')) %>% mutate(scope = "market"))
+
+
+centrality_measures <- centrality_measures %>%
+    mutate(yy = substr(year, 2, 5) %>% as.integer())
+```
+
+```{r}
+
+
+
+
+
+for (sc in (c("all", "tech", "market"))) {
+    print(sc)
+    centrality_measures_summary <- centrality_measures %>%
+        group_by(yy, scope) %>%
+        summarise(coreness_min = min(coreness),
+                  coreness_max = max(coreness)) %>% filter(scope == sc)
+    
+    p<-ggplot(centrality_measures_summary, aes(x = yy)) +
+        geom_ribbon(
+            aes(ymin = coreness_min, ymax = coreness_max),
+            fill = "gray",
+            alpha = 0.5
+        )   +
+        # Add dark solid gray line for the bottom limit (coreness_min)
+        geom_line(aes(y = coreness_min), color = "darkgray", size = 1) +
+        # Add dark solid gray line for the top limit (coreness_max)
+        geom_line(aes(y = coreness_max), color = "darkgray", size = 1) +
+        labs(x = "Year (yy)",
+             y = "Coreness",
+             title = sc) +
+        theme_minimal()
+    print(p)
+    
+}
+
+
+
+```
+
+```{r}
+
+centrality_measures_summary <- centrality_measures %>%
+  group_by(yy, scope) %>%
+  summarise(
+    coreness_min = min(coreness),
+    coreness_max = max(coreness)
+  ) %>% filter(scope == "tech")
+
+centrality_org_X <- centrality_measures %>%
+  filter(orgID %in% c( "o914772275", 
+                       "o886455647", "o999979500", "o967304468",
+                       "o999549887" #area science park
+                       )) %>%
+    filter(scope == "tech")
+
+# Plotting using geom_ribbon() for the gray area
+ggplot(centrality_measures_summary, aes(x = yy)) +
+  geom_ribbon(aes(ymin = coreness_min, ymax = coreness_max), 
+              fill = "blue", alpha = 0.5) +
+  geom_line(data = centrality_org_X, aes(y = coreness, color = orgID), 
+            size = 1) +
+  geom_point(data = centrality_org_X, aes(y = coreness, color = orgID), 
+            size = 2) +
+
+  labs(
+    x = "Year (yy)",
+    y = "Coreness",
+    title = "Coreness Each Year"
+  ) +
+  theme_minimal()
+
+
+
+centrality_measures_summary <- centrality_measures %>%
+  group_by(yy, scope) %>%
+  summarise(
+    coreness_min = min(coreness),
+    coreness_max = max(coreness)
+  ) %>% filter(scope == "market")
+
+centrality_org_X <- centrality_measures %>%
+  filter(orgID %in% c( "o914772275", 
+                       "o886455647", "o999979500", "o967304468",
+                       "o999549887" #area science park
+                       )) %>%
+    filter(scope == "market")
+
+# Plotting using geom_ribbon() for the gray area
+ggplot(centrality_measures_summary, aes(x = yy)) +
+  geom_ribbon(aes(ymin = coreness_min, ymax = coreness_max), 
+              fill = "green", alpha = 0.5) +
+  geom_line(data = centrality_org_X, aes(y = coreness, color = orgID), 
+            size = 1) +
+  geom_point(data = centrality_org_X, aes(y = coreness, color = orgID), 
+            size = 2) +
+
+  labs(
+    x = "Year (yy)",
+    y = "Coreness",
+    title = "Coreness Each Year"
+  ) +
+  theme_minimal()
 
 ```
 
 ```{r}
     
+
+
 
 summary_ts <- centrality_measures %>%
     group_by(orgID)%>%
