@@ -1,0 +1,266 @@
+---
+title: "figure4"
+format: html
+editor: visual
+---
+
+```{r}
+library(igraph)
+library(tidyverse)
+library(communities)
+library(cowplot)
+library(magick) #png
+require(gridExtra)
+
+source('./code/hi_0_parameters.R')
+source('./code/hi_functions.R')
+
+```
+
+# function
+
+```{r}
+ 
+
+make_figure_ssp <- function(ssp, met, ar) {
+    
+    plot_list <- c()
+    nn <- nrow(ssp$data) 
+    
+    plotssp <- communities::plot_sol_space(ssp)
+    
+    plot_list[[length(plot_list) + 1]] <- plotssp$pl2 +
+        theme(legend.position =  "none") +
+        labs(title = paste0("method: ", met)) +
+        theme(panel.grid.minor = element_blank(),  
+              aspect.ratio = ar)   
+    
+    plot_list[[length(plot_list) + 1]] <- plotssp$pl3 +
+        theme(legend.position =  "none") +
+        labs(x = "community size distribution", title = " ") +
+        theme(panel.grid.minor = element_blank(),
+              panel.grid.major = element_blank(),
+              axis.text.y = element_blank(),  
+              axis.ticks.y = element_blank(),
+              aspect.ratio = ar)+
+        ylim(0.5,nn+0.5) 
+    
+
+    return(plot_grid(
+        plotlist = plot_list,
+        ncol = 2,
+        nrow = 1))
+
+}
+
+```
+
+ 
+
+```{r}
+
+gy <- igraph::read.graph(file = './data/filtered-h/2024.graphml',
+format = 'graphml')
+gy <- igraph::simplify(gy, edge.attr.comb = 'sum')
+print(paste(vcount(gy), ecount(gy)))
+gy <- delete_edges(gy, E(gy)[weight < 0.01])
+gy <- delete_vertices(gy, V(gy)[degree(gy) == 0])
+print(paste(vcount(gy), ecount(gy)))
+
+met = "LV" 
+n_trials <-100
+
+ssp <- communities::solutions_space(gy,
+                                        met = met,
+                                        n_trials = n_trials,
+                                        resolution = 1.0 )
+ssp <- quality_check(gy, ssp)
+ssp$data <- ssp$data %>%
+    mutate(id = if_else(valid == FALSE, paste0(id,"-NV"), id)) %>%
+    head(10)
+
+
+pl<-make_figure_ssp(ssp, met = "LV", ar = 0.6) 
+png("./figures/4-explore-sol-space/sol_LV.png", height = 8, width = 20, units = "cm", res = 600, bg = "white")
+pl
+dev.off()
+pl
+
+
+```
+```{r}
+ 
+met = "IM" 
+n_trials <-100
+
+ssp <- communities::solutions_space(gy,
+                                        met = met,
+                                        n_trials = n_trials,
+                                        IM.nb.trials = 1.0 )
+ssp <- quality_check(gy, ssp)
+ssp$data <- ssp$data %>%
+    mutate(id = if_else(valid == FALSE, paste0(id,"-NV"), id)) %>%
+    head(4)
+pl<-make_figure_ssp(ssp, met = "IM", ar = 0.6) 
+png("./figures/4-explore-sol-space/sol_IM.png", height = 8, width = 20, units = "cm", res = 600, bg = "white")
+pl
+dev.off()
+pl
+
+```
+
+
+ricostruzione della storia
+```{r}
+
+
+
+bayesian_update_1 <- function(prior, selected) {
+  # a, b: Parameters of the prior Beta(a, b) distribution
+  # i: index of  solution that will be updates
+  posterior <- prior
+  for (i in 1:nrow(prior)) {
+    if (i == selected) {
+      posterior$a[i] <- prior$a[i] + 1
+    } else {
+      posterior$b[i] <- prior$b[i]  + 1
+    }
+  }
+  return(posterior)
+}
+
+bayesian_new_1 <- function(prior) {
+  posterior <- prior
+  n = posterior$a[1] + posterior$b[1] - 2
+  posterior <- rbind(posterior, data.frame(a = 2, b = n))
+  posterior$b <- posterior$b + 1
+  return(posterior)
+}
+
+g <- gy
+n_trials = 100
+met = 'IM'
+shuffle = TRUE
+comp_method = 'ari'#ari
+confidence = .999
+resolution = 1.0
+IM.nb.trials = 1
+WT.steps = 3
+tmp <- data.frame()
+new_solutions <- c()
+
+M <- matrix(NA, nrow = vcount(g), ncol = 1)
+S <- matrix(0.0,  nrow = n_trials, ncol = n_trials)
+ns <- 0
+s <- 1
+results<- data.frame()
+
+prior <- data.frame(a = 1, b = 1) # no trials, no info
+
+for (t in 1:n_trials) {
+  if (shuffle == TRUE) {
+    gs <- igraph::permute(g, sample(vcount(g)))
+  } else {
+    gs <- g
+  }
+  
+  comms <- switch(
+    met,
+    "IM" = igraph::infomap.community(gs, nb.trials = IM.nb.trials),
+    "WT" = igraph::walktrap.community(gs, steps = WT.steps),
+    "LV" = igraph::cluster_louvain(gs, resolution = resolution),
+    "LD" = igraph::cluster_leiden(gs, resolution_parameter = resolution),
+    "LP" = igraph::label.propagation.community(gs),
+    "EV" = igraph::cluster_leading_eigen(gs),
+    "EB" = igraph::cluster_edge_betweenness(gs)
+  )
+  
+  membership <- comms$membership
+  
+  if (t == 1) {
+    # first solution found
+    M[, 1] <- membership[match(V(g)$name, V(gs)$name)]
+    ns <- 1
+    posterior <- bayesian_update_1(prior, 1)
+    
+  } else {
+    # check if already exists
+    for (i in 1:ns) {
+      sim_score <- switch(
+        comp_method,
+        "ari" = aricode::ARI(membership[match(V(g)$name, V(gs)$name)], M[, i]),
+        "ami" = aricode::AMI(membership[match(V(g)$name, V(gs)$name)], M[, i]),
+        "Invalid selection"
+      )
+      
+      if (sim_score == 1) {
+        #we already have this solution
+        posterior <- bayesian_update_1(posterior, i)
+        break # no need to explore further
+      }
+    }#end for
+    
+    if (sim_score < 1) {
+      #it's a new solution
+      ns <- ns + 1
+      M <-
+        cbind(M, membership[match(V(g)$name, V(gs)$name)])
+      posterior <- bayesian_new_1(posterior)
+      new_solutions <- c(new_solutions, t)
+    }
+    
+   
+    
+  }#end if
+  
+  for (j in 1:ns) {
+    #print(paste("Updating ", t, j ))
+    tmp <- rbind(
+      tmp,
+      data.frame(
+        t = t,
+        ns = j,
+        upper = qbeta(1 - x, posterior$a[j], posterior$b[j]),
+        lower = qbeta(x  , posterior$a[j], posterior$b[j]),
+        median = qbeta(0.5, posterior$a[j], posterior$b[j]),
+        a = posterior$a[j],
+          b = posterior$b[j]
+      )
+    )
+  }
+  prior <- posterior
+  
+  
+}#end for
+
+
+
+
+
+```
+
+```{r}
+
+pl<-tmp %>% mutate(ns = as.factor(ns))%>% #filter(t<=20)%>%
+  ggplot(aes(x = t, group = ns, color = ns ))+
+  geom_line(aes(y =median), linewidth = .5)+
+  geom_point(aes(y =median), size  = 1)+
+  geom_ribbon(aes(ymin = lower, ymax = upper, fill = ns), alpha = 0.1)+
+  guides(fill = "none")+
+  geom_line(aes(y =lower))+
+  ylim(0,1)+
+  #facet_grid(~ns)+
+  theme_minimal()+
+  theme(aspect.ratio = .4)+
+  labs(x = "trials", y = "probability", color = "solutions" , ns = "")+
+  geom_hline(yintercept = c(0, .5, 1.0), color = "black")+
+  geom_vline(xintercept = new_solutions, color = "black", linetype = "dotted")
+pl
+png("./figures/4-explore-sol-space/sol_trials.png", height = 10, width = 24, units = "cm", res = 600, bg = "white")
+pl
+dev.off()
+
+```
+
+  
+

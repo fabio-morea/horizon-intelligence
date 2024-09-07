@@ -334,7 +334,7 @@ ssp$data <- ssp$data %>%
     mutate(id = if_else(valid == FALSE, paste0(id,"-NV"), id)) %>%
     head(10)
 
-p2 <- make_figure_ssp(ssp|>head(10), 
+p2 <- make_figure_ssp(ssp), 
                       met=met, ar = .9)
 filefigure2 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
 ggsave(filefigure2, 
@@ -346,6 +346,8 @@ hist(ssp$simil)
 
 ```
 
+ssp\$data
+
 ```{r}
 met = "IM"
 n_trials=100
@@ -356,8 +358,10 @@ ssp <- communities::solutions_space(gy,
 ssp <- quality_check(gy, ssp)
 ssp$data <- ssp$data %>%
             mutate(id = if_else(valid == FALSE, 
-                               paste0(id,"-NV"), id))
-p3<-make_figure_ssp(ssp, met=met, ar = 0.9)
+                               paste0(id,"-NV"), id))%>%
+    head(10)
+p3<-make_figure_ssp(ssp, 
+                    met=met, ar = 0.9)
 filefigure3 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
 ggsave(filefigure3, 
        plot = p3, 
@@ -378,16 +382,16 @@ ssp <- communities::solutions_space(gy,
         ssp$data <- ssp$data %>%
             mutate(id = if_else(valid == FALSE, 
                                paste0(id,"-NV"), id))
-p4 <-make_figure_ssp(ssp, met=met, ar = 0.9)
+p4 <-make_figure_ssp(ssp, met=met, ar = 0.2)
 
 filefigure4 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
 ggsave(filefigure4, 
        plot = p4, 
-       width = 10, height = 3, dpi = 300)
+       width = 10, height = 1, dpi = 300)
 p4
 
-
-  
+#table(ssp$M)
+  #hist(ssp$simil)
 
 ```
 

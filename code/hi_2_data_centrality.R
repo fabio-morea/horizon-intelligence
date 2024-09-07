@@ -98,16 +98,28 @@ participation <- df %>%
         normalized_by_project_duration = days_active / project_duration
     ) %>%
     ungroup() %>%
-    mutate(weight = round(totalCost * normalized_by_project_duration, 3)) %>%
+    
+    mutate(w_total_cost = round(totalCost * normalized_by_project_duration, 3)) %>%
+    mutate(w_ec_contrib = round(netEcContribution * normalized_by_project_duration, 3)) %>%
+    
     mutate(year = year_weight)%>%
     select(-days_active,-project_duration,-normalized_by_project_duration, -year_weight, -startDate, -endDate)%>% 
-    filter(weight > 0) 
+    mutate(perc = w_ec_contrib/w_total_cost)%>%
+    filter(w_total_cost > 1.0) %>%
+    filter(w_ec_contrib > 1.0) %>%
+    filter(perc > .01)
+
 
 participation %>% write_csv(paste0(destination_path,'participation.csv'))
-part <-participation
+
 
 ######### network centrality measures ######### ######### 
+part <-participation
 
+# select the weight
+part <- part %>%
+    mutate(weight = w_ec_contrib)
+    #mutate(weight = w_total_cost)
 
 
 centrality_measures <- data.frame()
