@@ -27,15 +27,13 @@ NAVHorgsnames<-tmp %>% distinct() %>% select(orgID, shortName) %>%
 ```
 
 show the NAHV orgs data
+
 ```{r}
 NAHVorgs %>% filter(year == 2024) %>%
   ggplot(aes(y = shortName, x = totalCost))+
   geom_col()
 NAHVorgs %>% group_by(shortName) %>% reframe(weight)%>%arrange(-weight)
 ```
-
-
-
 
 ```{r}
 
