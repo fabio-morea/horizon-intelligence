@@ -16,8 +16,8 @@ source('./code/hi_functions.R')
 df<- data.frame()
 for(yy in 2015:2029){
 g <- read.graph(file = paste0('data/filtered-h/',yy,'.graphml'),format = 'graphml')
-g <- delete_edges(g, E(g)[weight == 0])
-g <- delete_vertices(g, degree(g) ==0)
+#g <- delete_edges(g, E(g)[weight == 0])
+#g <- delete_vertices(g, degree(g) ==0)
 df<- rbind(df, data.frame(
     year = yy,
     n_org = vcount(g),
@@ -28,14 +28,13 @@ df<- rbind(df, data.frame(
 print(df)
 ```
 
-
 ```{r}
 
 df$color <- ifelse(df$year < 2024, "orange", ifelse(df$year == 2024, "red", "lightgray"))
 
 
 pp<-ggplot(df, aes(x = n_org, y = n_coll)) +
-  geom_point(shape = 21, stroke = 1, aes(fill = color, size = weight)) +  
+  geom_point(shape = 21, stroke = 1, aes(fill = color, size = weight), alpha = .5) +  
   scale_size_continuous(range = c(1, 12)) +  # size of bubbles
       scale_fill_identity() +  # exact colors specified in the 'color' column
     
@@ -45,9 +44,9 @@ pp<-ggplot(df, aes(x = n_org, y = n_coll)) +
                na.rm = TRUE) +  # Remove NAs that may arise at the last row
 
 
-    xlim(0,900)+ ylim(0,9000)+
-    geom_text(data = subset(df, year %in% c(2015, 2024)), 
-            aes(label = year), vjust = 0.9, hjust = -0.4, size = 4, color = "black") +  # Add labels for specified years
+    xlim(0,800)+ ylim(0,7000)+
+    geom_text(data = subset(df, year %in% c(2015, 2022, 2024)), 
+            aes(label = year), vjust = 0.5, hjust = -0.4, size = 4, color = "black") +  # Add labels for specified years
   
   labs(
     #title = "Bubble Chart: Number of Projects vs Number of Organizations with Arrows",
@@ -55,10 +54,11 @@ pp<-ggplot(df, aes(x = n_org, y = n_coll)) +
     y = "Number of Collaborations",
     size = "Total Weight"
   ) +
-  theme_minimal() + theme(aspect.ratio = .5)
-pp
-png(paste0('./figures/5-community time/networksyears.png'), height = 300, width = 800, units = "px", bg = "white")
+  theme_minimal() + theme(aspect.ratio = .6)
+
+pp 
+
+png(paste0('./figures/5-community time/networksyears.png'), height = 300, width = 600, units = "px", bg = "white")
 pp
 dev.off()
 ```
-
