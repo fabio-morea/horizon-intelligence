@@ -27,7 +27,7 @@ part <- read_csv(paste0(destination_path, 'participation.csv')) %>%
 
 part_summary <- part %>%
     group_by(year, tech) %>%  # Group by 'year' and 'tech'
-    summarize(total_weight = sum(weight, na.rm = TRUE),
+    summarize(total_weight = sum(totalCost|>round(3), na.rm = TRUE),
               .groups = "drop")   %>%
     mutate(total_weight = total_weight/1e6)
  
@@ -53,8 +53,7 @@ pl1 <- part_summary %>%
     panel.grid.major.x = element_blank(),  # Remove major gridlines on the x-axis
     panel.grid.minor.x = element_blank(),  # Remove minor gridlines on the x-axis
     panel.grid.minor.y = element_blank()   # Remove minor gridlines on the y-axis
-  ) +
-    ylim(0,6)
+  )
 # Print the plot
 pl1
 
@@ -64,7 +63,7 @@ png(
   width = 16, 
   height = 8, 
   units = "cm",
-  res = 300  # Optional: Set resolution for better quality
+  res = 300  
 )
 
 # Print the plot to the PNG device

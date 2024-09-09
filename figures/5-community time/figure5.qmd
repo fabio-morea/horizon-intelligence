@@ -50,8 +50,8 @@ yy=2018
 g <- read.graph(file = paste0('data/filtered-h/',yy,'.graphml'),format = 'graphml')
 vcount(g)
 
-#g <- delete_edges(g, E(g)[weight <.001])
-#g <- delete_vertices(g, degree(g) ==0)
+g <- delete_edges(g, E(g)[weight <.001])
+g <- delete_vertices(g, degree(g) ==0)
 vcount(g)
 
 
@@ -60,7 +60,7 @@ lo <- layout.fruchterman.reingold(g)
 plot(g, vertex.label = NA, 
      vertex.size = sqrt(V(g)$R_strength) *50, 
      vertex.color = V(g)$community, 
-     edge.width = E(g)$weight,
+     edge.width = sqrt(E(g)$weight),
      layout = lo, asp = 0.5)
 
 nc = max(V(g)$community)
@@ -70,9 +70,10 @@ for (i in 1:nc){
     if(vcount(gc) <4){next}
     lo <- layout.graphopt(gc)
 plot(gc, vertex.label = NA, 
-     vertex.size = sqrt(V(gc)$R_strength) *50, 
+     vertex.size = sqrt(V(gc)$R_strength) *60, 
      vertex.color = V(gc)$community, 
-     layout = lo, asp = 0.5)
+          edge.width = sqrt(E(gc)$weight)*5,
+     layout = lo, asp = 1)
 }
  
 

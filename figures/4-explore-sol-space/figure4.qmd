@@ -19,58 +19,7 @@ source('./code/hi_functions.R')
 # function
 
 ```{r}
-#yy = 2024
-#met = "LD"
-#ar = .5
-
-# make_figure <- function(yy, met, param, n_trials, ar) {
-#     gy <-
-#         igraph::read.graph(file = paste0(destination_path, yy, '.graphml'),format = 'graphml')
-#     gy <- igraph::simplify(gy, edge.attr.comb = 'sum')
-#     
-#     plot_list <- c()
-#     
-#     ssp <- communities::solutions_space(gy,
-#                                         met = met,
-#                                         n_trials = n_trials,
-#                                         resolution = param, 
-#                                         IM.nb.trials = param,
-#                                         WT.steps = param)
-#     
-#     ssp <- quality_check(gy, ssp)
-#     
-#     ssp$data <- ssp$data %>%
-#         mutate(id = if_else(valid == FALSE, 
-#                                paste0(id,"-NV"), id))
-#     
-#     
-#     
-#     nn <- nrow(ssp$data) 
-#     
-#     plotssp <- communities::plot_sol_space(ssp)
-#     
-#     plot_list[[length(plot_list) + 1]] <- plotssp$pl2 +
-#         theme(legend.position =  "none") +
-#         labs(title = paste0("method: ", met)) +
-#         theme(panel.grid.minor = element_blank(),  
-#               aspect.ratio = ar)   
-#     
-#     plot_list[[length(plot_list) + 1]] <- plotssp$pl3 +
-#         theme(legend.position =  "none") +
-#         labs(x = "community size distribution", title = " ") +
-#         theme(panel.grid.minor = element_blank(),
-#               panel.grid.major = element_blank(),
-#               axis.text.y = element_blank(),  
-#               axis.ticks.y = element_blank(),
-#               aspect.ratio = ar)+
-#         ylim(0.5,nn+0.5) 
-#     
-#     return(plot_grid(
-#         plotlist = plot_list,
-#         ncol = 2,
-#         nrow = 1))
 # 
-# }
 
 make_figure_ssp <- function(ssp, met, ar) {
     
@@ -83,7 +32,8 @@ make_figure_ssp <- function(ssp, met, ar) {
         theme(legend.position =  "none") +
         labs(title = paste0("method: ", met)) +
         theme(panel.grid.minor = element_blank(),  
-              aspect.ratio = ar)   
+              aspect.ratio = ar) +
+        labs(title = "", y = paste("solution space", met))
     
     plot_list[[length(plot_list) + 1]] <- plotssp$pl3 +
         theme(legend.position =  "none") +
@@ -95,20 +45,26 @@ make_figure_ssp <- function(ssp, met, ar) {
               aspect.ratio = ar)+
         ylim(0.5,nn+0.5) 
     
-    # df <- data.frame( x = ssp$simil[upper.tri(ssp$simil,diag = FALSE)] ) 
-    # 
-    # 
-    #  <- df%>%
-    #     ggplot() + geom_histogram(aes(y = x), color = 'white', fill = 'gray')+
-    #     theme_minimal()+theme(aspect.ratio = 3)+
-    #     geom_hline(yintercept = 1.0)+
-    #     geom_hline(yintercept = 0.5)+
-    #     geom_hline(yintercept = 0.0)+
-    #     labs(y = "similarity")
-    # 
+    if (nrow(ssp$data) > 1){
+        
+    
+    df <- data.frame( x = ssp$simil[upper.tri(ssp$simil,diag = FALSE)])
+    plot_list[[length(plot_list) + 1]]<- df%>%
+        ggplot() + 
+        geom_histogram(aes(x = x,y = ..count../sum(..count..)), 
+                       color = 'white', fill = 'black')+
+        theme_minimal()+
+        theme(aspect.ratio = ar)+
+        xlim(0.5,1)+#ylim(0, 0.5)+
+        geom_vline(xintercept = 1.0)+
+        geom_vline(xintercept = 0.5)+
+        geom_vline(xintercept = 0.0)+
+        labs(x = "similarity", y = "")
+    }
+
     return(plot_grid(
         plotlist = plot_list,
-        ncol = 2,
+        ncol = 3,
         nrow = 1))
 
 }
@@ -217,7 +173,7 @@ all_results <- all_results |> mutate(year = factor(year))
 all_results |> write_csv("all_results.csv")
 ```
 
-plot
+# read and plot
 
 ```{r}
 all_results <-read_csv("all_results.csv")
@@ -237,7 +193,7 @@ all_results %>% ggplot(aes(x = year, y = n_valid_solutions, group = year))+
 ```{r}
 # Calculate the minimum and maximum values for each year
 year_limits <- all_results %>%
-    filter(met != "LD") %>%
+    filter(met %in% c("LV", "IM", "LP")) %>%
     group_by(year) %>%
     summarize(min_y = min(n_valid_solutions),
               max_y = max(n_valid_solutions))
@@ -262,7 +218,7 @@ plot_n_solutions <- all_results %>% filter(met != "LD") %>%
     scale_shape_manual(values = c(1, 0, 2, 4)) + # Hollow circle, square, triangle, X
     theme_light() +
     theme(aspect.ratio = .4)+
-    scale_y_log10() +
+    #scale_y_log10() +
     
     scale_x_continuous(breaks = unique(all_results$year)) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),
@@ -301,9 +257,11 @@ gy <- igraph::simplify(gy, edge.attr.comb = 'sum')
  
 ```
 
+## LV
+
 ```{r}
 met = "LV" 
-n_trials <-100
+n_trials <-50
 
 ssp <- communities::solutions_space(gy,
                                         met = met,
@@ -318,54 +276,56 @@ p1<-make_figure_ssp(ssp, met=met, ar = .9)
 filefigure1 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
 ggsave(filefigure1, 
        plot = p1, 
-       width = 10, height = 3, dpi = 300)
+       width = 10, height = 3, dpi = 300, bg = "white")
 p1
 hist(ssp$simil)
 ```
 
+## LP
+
 ```{r}
 met = "LP"
-n_trials = 100
+n_trials = 50
 ssp <- communities::solutions_space(gy,
                                         met = met,
                                         n_trials = n_trials)
 ssp <- quality_check(gy, ssp)
 ssp$data <- ssp$data %>%
-    mutate(id = if_else(valid == FALSE, paste0(id,"-NV"), id)) %>%
+    mutate(id = if_else(valid == FALSE, paste0(id,"-NV"), id)) %>% 
     head(10)
 
-p2 <- make_figure_ssp(ssp), 
-                      met=met, ar = .9)
+p2 <- make_figure_ssp(ssp, met=met, ar = .9)
 filefigure2 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
 ggsave(filefigure2, 
        plot = p2, 
-       width = 10, height = 3, dpi = 300)
+       width = 10, height = 3, dpi = 300, bg = "white")
 p2
 
 hist(ssp$simil)
 
 ```
 
-ssp\$data
+## IM
 
 ```{r}
 met = "IM"
-n_trials=100
+n_trials=50
 ssp <- communities::solutions_space(gy,
                                         met = met,
                                         n_trials = n_trials,
-                                        IM.nb.trials = 1)       
+                                        IM.nb.trials = 5)       
 ssp <- quality_check(gy, ssp)
 ssp$data <- ssp$data %>%
             mutate(id = if_else(valid == FALSE, 
                                paste0(id,"-NV"), id))%>%
     head(10)
+
 p3<-make_figure_ssp(ssp, 
                     met=met, ar = 0.9)
 filefigure3 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
 ggsave(filefigure3, 
        plot = p3, 
-       width = 10, height = 3, dpi = 300)
+       width = 10, height = 3, dpi = 300, bg = "white")
 p3
 
 
@@ -374,6 +334,7 @@ hist(ssp$simil)
 
 ```{r}
 met = "WT"
+n_trials = 20
 ssp <- communities::solutions_space(gy,
                                         met = met,
                                         n_trials = n_trials, 
@@ -382,12 +343,13 @@ ssp <- communities::solutions_space(gy,
         ssp$data <- ssp$data %>%
             mutate(id = if_else(valid == FALSE, 
                                paste0(id,"-NV"), id))
-p4 <-make_figure_ssp(ssp, met=met, ar = 0.2)
+        
+p4 <-make_figure_ssp(ssp, met=met, ar = .5)
 
 filefigure4 <- paste0('./figures/4-explore-sol-space/figure-5',met,yy, '.png')
 ggsave(filefigure4, 
        plot = p4, 
-       width = 10, height = 1, dpi = 300)
+       width = 10, height = 3, dpi = 300, bg = "white")
 p4
 
 #table(ssp$M)
