@@ -12,8 +12,8 @@ miny <- 2015
 maxy <- 2029
 
 # community detection
-community_detection_method <- "IM"
-param = 1 #repetitions
+community_detection_method <- "WT"
+param = 5 #steps
 
 #filter 
 # selected_esv_topic <- "electron microscopy"

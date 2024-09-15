@@ -77,9 +77,9 @@ for (yy in miny:maxy) {
     
     
     ssp <- communities::solutions_space(gy,
-                                        n_trials = 200,
+                                        n_trials = 20,
                                         met = community_detection_method, 
-                                        IM.nb.trials = 1)
+                                        WT.steps = param)
     
     communities::plot_sol_space(ssp)$pl2 +
         ggtitle(paste("Solution space year", yy, "steps = ", param))
