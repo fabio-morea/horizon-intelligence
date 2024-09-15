@@ -21,7 +21,8 @@ param = 5 #steps
 # visual_title <- "subset topic = 'electron microscopy'"
 
 selected_esv_topic <- "hydrogen energy"
-destination_path <- "./data/filtered-h/"
+destination_path <- "../horizon-projects-network/hydrogen/"
+#destination_path <- "./data/filtered-h/"
 visual_title <- "subset topic = 'hydrogen energy'"
 
 # 
