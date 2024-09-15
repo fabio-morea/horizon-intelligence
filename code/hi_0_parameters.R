@@ -20,12 +20,12 @@ param = 5 #steps
 # destination_path <- "./data/filtered-m/"
 # visual_title <- "subset topic = 'electron microscopy'"
 
-# selected_esv_topic <- "hydrogen energy"
-# destination_path <- "./data/filtered-h/"
-# visual_title <- "subset topic = 'hydrogen energy'"
+selected_esv_topic <- "hydrogen energy"
+destination_path <- "./data/filtered-h/"
+visual_title <- "subset topic = 'hydrogen energy'"
 
-
-#https://cordis.europa.eu/project/id/101137192
-selected_esv_topic <- "pandemics"
-destination_path <- "./data/filtered-p/"
-visual_title <- "subset topic = 'pandemics'"
+# 
+# #https://cordis.europa.eu/project/id/101137192
+# selected_esv_topic <- "pandemics"
+# destination_path <- "./data/filtered-p/"
+# visual_title <- "subset topic = 'pandemics'"
