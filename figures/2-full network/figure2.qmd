@@ -14,44 +14,55 @@ source('./code/hi_functions.R')
 
 ```{r}
 
-for(yy in 2016:2016){
+for(yy in 2016:2029){
+    print(yy)
+    
+    # Load the graph
+    g <- read.graph(file = paste0('data/filtered-h/', yy, '.graphml'),
+                   format = 'graphml')
+    plot(g, vertex.label = NA, 
+         vertex.size = sqrt(V(g)$R_strength)*30, 
+         vertex.color = V(g)$community, 
+         main = paste("Year ", yy))
+    
+}
+
+```
+
+```{r}
+for(yy in 2016:2029) {
     print(yy)
     
     # Load the graph
     g <- read.graph(file = paste0('data/filtered-h/', yy, '.graphml'),
                    format = 'graphml')
     
-    # Step 1: Extract Subgraph with 'tech' edges (tech == TRUE)
-    g_tech <- delete_edges(g, E(g)[E(g)$tech == FALSE])
-    g_tech <- delete_vertices(g_tech, V(g_tech)[degree(g_tech) == 0])
+    # Calculate graph statistics
+    num_nodes <- vcount(g)
+    num_edges <- ecount(g)
     
-    # Step 2: Extract Subgraph with 'market' edges (tech == FALSE)
-    g_market <- delete_edges(g, E(g)[E(g)$tech == TRUE])
-    g_market <- delete_vertices(g_market, V(g_market)[degree(g_market) == 0])
+    # Set the filename for the jpg image
+    filename <- paste0('./figures/2-full network/network_', yy, '.jpg')
     
-    # Step 3: Create Data Frame with Vertex Attributes
-    df_org <- tibble(orgID = V(g)$name,
-                     weight = V(g)$str)
+    # Save the plot as a jpg file
+    jpeg(file = filename, width = 800, height = 600)
     
+    # Plot the graph
+    plot(g, vertex.label = NA, 
+         vertex.size = sqrt(V(g)$R_strength) * 30, 
+         vertex.color = V(g)$community)
     
-    df_tech <- tibble(orgID = V(g_tech)$name,
-                      weight_tech = V(g_tech)$str)
+    # Add the main title with the year
+    title(main = paste("Year", yy))
     
-    df_market <- tibble(orgID = V(g_market)$name,
-                        weight_market = V(g_market)$str)
-
-    # Step 4: Join data frames to merge the weights back into the original orgID list
-    dfstr <- df_tech %>%
-        #left_join(df_tech, by = "orgID") %>%
-        left_join(df_market, by = "orgID") %>%
-        mutate(            # Replace NA with 0.0 for missing weights
-            weight_tech = coalesce(weight_tech, 0.0),
-            weight_market = coalesce(weight_market, 0.0) 
-        )
-
-
+    # Add the second line (subtitle) with number of nodes and edges
+    mtext(paste("Nodes:", num_nodes, "| Edges:", num_edges),
+          side = 3, line = 0.5, cex = 0.8)
+    
+    # Close the jpg device
+    dev.off()
 }
- dfstr |> arrange(-weight)
+
 
 ```
 
