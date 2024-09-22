@@ -4,6 +4,9 @@
 /csv
 /api_url_key
 /dataset_zenodo
+/code_zenodo
+
+*.zip
  
 
 # notebook output
