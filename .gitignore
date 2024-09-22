@@ -1,9 +1,12 @@
 /data
+/data_keys
+/figures
 /visual
 /tmp
 /csv
 /api_url_key
 /dataset_zenodo
+ 
 
 # notebook output
 .html
