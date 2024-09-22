@@ -1,20 +1,11 @@
-# Author: Fabio Morea @ Area Science Park
-# Package: Horizon-intelligence
-# script: communities over time
-
-# input:
-# clean data from CORDIS 
-
-# output
-# community detection by year
-
-# SPDX-License-Identifier: CC-BY-4.0
-# GitLab: https://gitlab.com/fabio-morea/
-
-# devtools::install_github('fabio-morea/')
+### 
+### Horizon Intelligence 
+### developed by Fabio Morea, Area Science Park, Trieste, Italy.
+### contact: fabio.morea@areasciencepark.it
+### ORCID: 0000-0002-2034-2951
+###  
 
 # libraries
-#options(warn = -1)
 library(tidyverse)
 library(igraph)
 library(aricode)

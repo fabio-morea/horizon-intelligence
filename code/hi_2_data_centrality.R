@@ -1,8 +1,10 @@
+### 
+### Horizon Intelligence 
+### developed by Fabio Morea, Area Science Park, Trieste, Italy.
+### contact: fabio.morea@areasciencepark.it
+### ORCID: 0000-0002-2034-2951
+###  
 
-# procedure: 
-#   first subset by topic
-#   then calculate weight by year (on the subset only)
-# 
 
 source('./code/hi_0_parameters.R')
 source('./code/hi_functions.R')
@@ -173,7 +175,6 @@ for (yy in ystart:yend ) {
     
     
     
-    ########################################
     ########################################
     print("centrality measures")
     E(gi)$weight <- E(gi)$weight %>% round(6)   

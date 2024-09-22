@@ -1,9 +1,14 @@
+### 
+### Horizon Intelligence 
+### developed by Fabio Morea, Area Science Park, Trieste, Italy.
+### contact: fabio.morea@areasciencepark.it
+### ORCID: 0000-0002-2034-2951
+###  
+
 source('./code/hi_0_parameters.R')
 source('./code/hi_functions.R')
 
-
-
-###### DOWNLOAD ##########  
+###### DOWNLOAD  ##########  
 # download datasets from: https://data.europa.eu/data/datasets
 ##  Horizon 2020 (2014-2020)
 ##  access page: https://data.europa.eu/data/datasets/cordish2020projects 
@@ -29,10 +34,7 @@ library(tidyverse)
 library(lubridate)
 library(readxl)
 
-
-
 ############# functions ############# 
-
 
 download_dataset <- function(cordis_address, local_folder){
     print("Downloading CORDIS data from cordis.europa.eu ")

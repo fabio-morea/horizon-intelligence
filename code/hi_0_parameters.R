@@ -1,4 +1,11 @@
-#parameters for horizon intelligent scripts
+### 
+### Horizon Intelligence 
+### developed by Fabio Morea, Area Science Park, Trieste, Italy.
+### contact: fabio.morea@areasciencepark.it
+### ORCID: 0000-0002-2034-2951
+###  
+
+### PARAMETERS and choice of case study 
 
 #download
 download_H2020 <- F
@@ -12,7 +19,7 @@ case_studies <- list(
     "hydrogen" = list(
         selected_esv_topic = "hydrogen energy",
         destination_path = "./data/filtered-h/",
-        visual_title = "subset topic = ''hydrogen energy'",
+        visual_title = "subset topic = 'hydrogen energy'",
         miny = 2015, 
         maxy = 2029,
         community_detection_method = "WT",

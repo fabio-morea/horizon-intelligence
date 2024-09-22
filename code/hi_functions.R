@@ -1,7 +1,12 @@
-
-#######################################
-
+### 
+### Horizon Intelligence 
+### developed by Fabio Morea, Area Science Park, Trieste, Italy.
+### contact: fabio.morea@areasciencepark.it
+### ORCID: 0000-0002-2034-2951
+###  
+###  
 ###################### function to calculate weight by year
+
 # Function to calculate the number of days of project activity in a given year
 days_in_year <- function(startDate, endDate, year) {
     year_start <- as.Date(paste0(year, "-01-01"))
@@ -18,9 +23,6 @@ days_in_year <- function(startDate, endDate, year) {
 }
 
 ################### functions network
-################### 
-
-
 make_orgs_network <- function(participation, network_name = '', plot_network = FALSE){
     # input:  a long dataframe of edges (bimodal network): org, project weight
     # output: a long dataframe of edges (one-mode network): org1, org2, weight
@@ -69,7 +71,6 @@ make_orgs_network <- function(participation, network_name = '', plot_network = F
     
     return(g_orgs)
 }
-#######################################
 #######################################
 
 print("functions loaded successfully")
